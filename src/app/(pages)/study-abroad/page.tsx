@@ -22,14 +22,7 @@ interface Course {
   duration: string;
   startDate: string;
   level: string;
-}
-
-interface PageLayoutProps {
-  children: React.ReactNode;
-}
-
-// Reusable hook for data fetching
-const useData = <T,>(url: string) => {
+      ))}
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -111,36 +104,32 @@ const CourseGrid = ({ courses }: { courses: Course[] }) => (
           transition={{ duration: 0.3, delay: index * 0.1 }}
           className="min-w-[300px] max-w-[350px] h-[500px]"
         >
-            <CourseCard
-              className="h-full flex flex-col bg-white/10 backdrop-blur-sm border-none text-white"
-              course={{
-                // Map backend fields to UI `Course` type expected by CourseCard
-                id: course.courseId ?? "",
-                title: course.title ?? "Untitled Course",
-                subtitle: course.summary ?? "",
-                thumbnailUrl: course.banner ?? "/assets/images/placeholder.jpg",
-                description: course.summary ?? course.objective ?? "",
-                price: 0,
-                instructor: course.coordinator ?? "Unknown Instructor",
-                rating: 0,
-                reviewCount: 0,
-                bestseller: false,
-                discount: 0,
-                // Normalize level to one of the expected enums
-                level:
-                  (course.level && course.level.toLowerCase().includes("premium"))
-                    ? "PREMIUM"
-                    : (course.level && course.level.toLowerCase().includes("standard"))
-                    ? "STANDARD"
-                    : (course.level && course.level.toLowerCase().includes("basic"))
-                    ? "BASIC"
-                    : "BASIC",
-                examCategories: [],
-                exams: [],
-                enrollmentCount: 0,
-              }}
-              onOpenPreview={() => alert(`Preview for ${course.title ?? "course"}`)}
-            />
+          <CourseCard
+            className="h-full flex flex-col bg-white/10 backdrop-blur-sm border-none text-white"
+            course={{
+              id: course.courseId ?? "",
+              thumbnailUrl: course.banner ?? "/assets/images/placeholder.jpg",
+              title: course.title ?? "Untitled Course",
+              subtitle: course.summary ?? "",
+              description: course.objective ?? "",
+              instructor: course.coordinator ?? "Unknown Instructor",
+              rating: 0,
+              reviewCount: 0,
+              enrollmentCount: 0,
+              price: 0,
+              discount: 0,
+              bestseller: false,
+              level: (((): "BASIC" | "STANDARD" | "PREMIUM" => {
+                const l = (course.level ?? "").toUpperCase();
+                return l === "BASIC" || l === "STANDARD" || l === "PREMIUM"
+                  ? (l as "BASIC" | "STANDARD" | "PREMIUM")
+                  : "BASIC";
+              })()),
+              examCategories: [],
+              exams: [],
+            }}
+            onOpenPreview={() => alert(`Preview for ${course.title ?? "course"}`)}
+          />
         </motion.div>
       ))}
     </div>

@@ -11,11 +11,12 @@ import { Course } from "@/type/course";
 interface CourseCardProps {
   course: Course;
   onOpenPreview: () => void;
+  className?: string;
 }
 
-export function CourseCard({ course, onOpenPreview }: CourseCardProps) {
+export function CourseCard({ course, onOpenPreview, className }: CourseCardProps) {
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-md">
+    <Card className={`${className ? className + " " : ""}overflow-hidden transition-all hover:shadow-md`}>
       <div className="relative h-48 w-full overflow-hidden">
         <Image
           src={course.thumbnailUrl || "/placeholder.svg?height=200&width=400"}
