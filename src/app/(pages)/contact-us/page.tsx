@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState } from "react";
@@ -15,7 +14,7 @@ import { toast } from "sonner";
 const ContactPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formStatus, setFormStatus] = useState({
-    type: "", // "success" or "error"
+    type: "",
     message: "",
     show: false,
   });
@@ -41,6 +40,7 @@ const ContactPage = () => {
         body: json,
       });
       const result = await response.json();
+
       if (result.success) {
         (event.target as HTMLFormElement).reset();
         setFormStatus({
@@ -49,7 +49,7 @@ const ContactPage = () => {
           show: true,
         });
         toast("Your message has been sent successfully!", {
-          description: "We'll get back to you soon.",
+          description: "We&apos;ll get back to you soon.",
           className: "bg-green-100 border-green-500",
         });
       } else {
@@ -87,8 +87,12 @@ const ContactPage = () => {
         transition={{ duration: 0.5 }}
         className="h-64 flex flex-col justify-center items-center text-white"
       >
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">Contact Us</h1>
-        <p className="text-lg md:text-xl">We'd love to hear from you!</p>
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">
+          Contact Us
+        </h1>
+        <p className="text-lg md:text-xl">
+          We&apos;d love to hear from you!
+        </p>
       </motion.div>
 
       {/* Main Content */}
@@ -157,12 +161,13 @@ const ContactPage = () => {
             <Card className="bg-white/90 backdrop-blur-lg">
               <CardContent className="p-8">
                 <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                  Let's Build Something Amazing Together
+                  Let&apos;s Build Something Amazing Together
                 </h2>
                 <p className="text-gray-600 mb-6">
-                  Share your vision with us, and we'll help bring it to life with
-                  our expertise and innovative solutions.
+                  Share your vision with us, and we&apos;ll help bring it to life
+                  with our expertise and innovative solutions.
                 </p>
+
                 {formStatus.show && (
                   <Alert
                     className={`mb-6 ${
@@ -171,9 +176,12 @@ const ContactPage = () => {
                         : "bg-red-100 border-red-500"
                     }`}
                   >
-                    <AlertDescription>{formStatus.message}</AlertDescription>
+                    <AlertDescription>
+                      {formStatus.message}
+                    </AlertDescription>
                   </Alert>
                 )}
+
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="space-y-2">
                     <Label htmlFor="name">Your Name*</Label>
@@ -185,6 +193,7 @@ const ContactPage = () => {
                       required
                     />
                   </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="email">Your Email*</Label>
@@ -209,6 +218,7 @@ const ContactPage = () => {
                       />
                     </div>
                   </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="message">Ask Me Anything</Label>
                     <Textarea
@@ -218,6 +228,7 @@ const ContactPage = () => {
                       placeholder="Your message here..."
                     />
                   </div>
+
                   <Button
                     type="submit"
                     className="w-full bg-blue-600 hover:bg-blue-700"
