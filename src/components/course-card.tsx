@@ -16,7 +16,7 @@ interface CourseCardProps {
 
 export function CourseCard({ course, onOpenPreview, className }: CourseCardProps) {
   return (
-    <Card className={`${className ? className + " " : ""}overflow-hidden transition-all hover:shadow-md`}>
+    <Card className={`overflow-hidden transition-all hover:shadow-md ${className ?? ""}`}>
       <div className="relative h-48 w-full overflow-hidden">
         <Image
           src={course.thumbnailUrl || "/placeholder.svg?height=200&width=400"}

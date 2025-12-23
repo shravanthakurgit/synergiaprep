@@ -227,11 +227,42 @@ export default function Page() {
   const [selectedCourse, setSelectedCourse] =
     useState<CourseCard | null>(null);
 
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    async function fetchCourses() {
+      if (!session?.user?.id) return;
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/v1/courses/users/${session.user.id}`);
+        if (!res.ok) {
+          console.error("Failed to fetch courses", res.status);
+          setCourses([]);
+          return;
+        }
+        const payload = await res.json();
+        // backend might return { data: [...] } or an array directly
+        const list: CourseCard[] = Array.isArray(payload)
+          ? payload
+          : payload?.data || payload?.courses || [];
+        setCourses(list);
+      } catch (e) {
+        console.error("Error fetching courses:", e);
+        setCourses([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCourses();
+  }, [session?.user?.id]);
+
   const handleCardClick = (course: CourseCard) => {
+    console.log("handleCardClick", course.id, course.title);
     setSelectedCourse(course);
   };
 
   const handleCloseOverlay = () => {
+    console.log("handleCloseOverlay");
     setSelectedCourse(null);
   };
 
@@ -246,7 +277,7 @@ export default function Page() {
           <div className="flex justify-center gap-6">
             {/* WBJEE */}
             <Card
-              className="w-80 cursor-pointer hover:scale-105 transition"
+              className="w-80 cursor-pointer hover:scale-105 transition pointer-events-auto"
               onClick={() =>
                 handleCardClick({
                   id: "1",
@@ -265,7 +296,7 @@ export default function Page() {
                 })
               }
             >
-              <CardContent className="p-0">
+                <CardContent className="p-0 pointer-events-none">
                 <Image
                   src="/assets/images/jee_course.jpg"
                   alt="WBJEE"
@@ -286,15 +317,57 @@ export default function Page() {
           </div>
         </div>
 
+        {/* User's Enrolled / Available Courses */}
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold mb-6 text-black">My Courses</h2>
+
+          {loading && (
+            <p className="text-sm text-gray-700">Loading your courses...</p>
+          )}
+
+          {!loading && (!courses || courses.length === 0) && (
+            <p className="text-sm text-gray-700">You have no courses yet.</p>
+          )}
+
+          <div className="flex flex-wrap gap-6">
+            {courses && courses.map((c) => (
+              <Card
+                key={c.id}
+                className="w-80 cursor-pointer hover:scale-105 transition"
+                onClick={() => handleCardClick(c)}
+              >
+                <CardContent className="p-0">
+                  {c.image ? (
+                    <Image
+                      src={c.image}
+                      alt={c.title}
+                      width={320}
+                      height={180}
+                      className="w-full h-48 object-cover rounded-t-xl"
+                    />
+                  ) : (
+                    <div className="w-full h-48 bg-gray-100 rounded-t-xl" />
+                  )}
+                  <div className="p-6">
+                    <h3 className="font-semibold">{c.title}</h3>
+                    <p className="text-sm text-gray-600">{c.subtitle}</p>
+                    <p className="mt-2 text-sm font-bold">{c.price === 0 ? "Free" : `₹${c.price}`}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
         {selectedCourse && (
           <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center">
-            <Card className="max-w-3xl w-full">
+            <Card className="max-w-3xl w-full pointer-events-auto">
               <CardHeader>
                 <CardTitle>{selectedCourse.title}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p>{selectedCourse.courseContent}</p>
-                <Button onClick={handleCloseOverlay}>Close</Button>
+                <Button onClick={handleCloseOverlay} className="pointer-events-auto">Close</Button>
               </CardContent>
             </Card>
           </div>

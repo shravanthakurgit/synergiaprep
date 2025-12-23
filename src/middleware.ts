@@ -12,14 +12,19 @@ export const middleware = (req: NextRequest) => {
   const { nextUrl } = req;
   const pathname = nextUrl.pathname;
 
-  // Determine login by presence of NextAuth session cookie (supports both secure and non-secure names)
+  // Determine login by presence of auth/session cookies.
+  // Support older NextAuth names and Auth.js names (authjs.*).
+  const cookieHeader = req.headers.get("cookie") || "";
   const sessionCookie =
     req.cookies.get("__Secure-next-auth.session-token")?.value ||
     req.cookies.get("next-auth.session-token")?.value ||
     req.cookies.get("next-auth.callback-url")?.value ||
+    // Some setups (Auth.js) use authjs.* cookie names — fall back to checking raw header
+    (cookieHeader.includes("authjs") ? cookieHeader : undefined) ||
+    (cookieHeader.includes("next-auth") ? cookieHeader : undefined) ||
     undefined;
 
-  const isLoggedIn = !!sessionCookie;
+  const isLoggedIn = Boolean(sessionCookie && cookieHeader.length > 0);
   const isAuthRoute = authRoutes.includes(pathname);
 
   const isPrivateRoute = privateRoutes.some((route) => pathname.startsWith(route));
