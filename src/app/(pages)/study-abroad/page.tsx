@@ -22,7 +22,14 @@ interface Course {
   duration: string;
   startDate: string;
   level: string;
-      ))}
+}
+
+interface PageLayoutProps {
+  children: React.ReactNode;
+}
+
+// Reusable hook for data fetching
+const useData = <T,>(url: string) => {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

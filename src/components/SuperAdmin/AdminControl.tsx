@@ -237,7 +237,8 @@ export default function AdminControl() {
   const renderAdminComponent = (componentName:string) => {
     switch (componentName) {
       case "ExamCreator":
-        return <ExamCreator />
+        // Provide a null draft for preview and optional onFinish handler
+        return <ExamCreator draft={null} />
       case "OtherExamForms":
         return <OtherExamForms />
       default:

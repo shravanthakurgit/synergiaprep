@@ -96,13 +96,16 @@ export const PATCH = async (req: NextRequest) => {
       name?: string;
       email?: string;
       image?: string | null;
-      ph_no?: number | null;
+      ph_no?: string;
     } = {};
 
     if (name !== undefined) updateData.name = name;
     if (email !== undefined) updateData.email = email;
     if (image !== undefined) updateData.image = image;
-    if (ph_no !== undefined) updateData.ph_no = ph_no;
+    // Only set phone number if it's a non-null value. Prisma `ph_no` is non-nullable string.
+    if (ph_no !== undefined && ph_no !== null) {
+      updateData.ph_no = String(ph_no);
+    }
 
     // Only update if there's something to update
     if (Object.keys(updateData).length === 0) {
