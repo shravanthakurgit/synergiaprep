@@ -13,43 +13,14 @@ import { Button } from "@/components/ui/button";
 export default function Page() {
   const { data: session } = useSession();
   const [courses, setCourses] = useState<Course[] | null>(null);
-  const [enrolledCount, setEnrolledCount] = useState<number | null>(null);
   const [studyHours, setStudyHours] = useState<number | null>(null);
-  const [mockTestsTaken, setMockTestsTaken] = useState<number | null>(null);
 
   useEffect(() => {
     async function fetchCourses() {
       try {
         const response = await fetch(`/api/v1/courses/users/${userid}`);
         const data = await response.json();
-        const fetchedCourses = data?.data ?? data ?? [];
-        setCourses(fetchedCourses);
-        setEnrolledCount(Array.isArray(fetchedCourses) ? fetchedCourses.length : 0);
-
-        // Try to fetch mock tests (user submissions) count if the endpoint exists
-        try {
-          const subsRes = await fetch(`/api/v1/user-submissions?userId=${userid}`);
-          if (subsRes.ok) {
-            const subsData = await subsRes.json();
-            const subs = subsData?.data ?? subsData ?? [];
-            setMockTestsTaken(Array.isArray(subs) ? subs.length : Number(subs) || 0);
-          }
-        } catch (e) {
-          // ignore if endpoint not available
-          setMockTestsTaken(null);
-        }
-
-        // Try to fetch study hours if API exists
-        try {
-          const hoursRes = await fetch(`/api/v1/users/${userid}/study-hours`);
-          if (hoursRes.ok) {
-            const hoursData = await hoursRes.json();
-            const hrs = hoursData?.hours ?? hoursData?.studyHours ?? hoursData ?? null;
-            setStudyHours(typeof hrs === "number" ? hrs : Number(hrs) || 0);
-          }
-        } catch (e) {
-          setStudyHours(null);
-        }
+        setCourses(data.data);
         // console.log("User ID:", session?.user.id);
         // console.log("Fetched courses:", data);
       } catch (error) {
@@ -63,22 +34,41 @@ export default function Page() {
       return;
     }
     fetchCourses();
+
+    async function fetchStudyHours() {
+      try {
+        const resp = await fetch(`/api/v1/users/${userid}/study-hours`);
+        const j = await resp.json();
+        if (typeof j?.hours === "number") setStudyHours(j.hours);
+      } catch (err) {
+        console.error("Error fetching study hours:", err);
+      }
+    }
+
+    fetchStudyHours();
   }, [session?.user.id]);
+
+  const completedCourses = courses ? courses.length : null;
+  const availableMockTests = courses
+    ? courses.reduce((acc, c) => acc + (c.exams?.length ?? 0), 0)
+    : null;
 
   const learningStats = [
     {
-      title: "Enrolled Courses",
-      value: enrolledCount === null ? "—" : String(enrolledCount),
+      title: "Completed Courses",
+      value: completedCourses !== null ? String(completedCourses) : "—",
       change: "",
     },
     {
       title: "Study Hours Logged",
-      value: studyHours === null ? "—" : `${studyHours} hours`,
+      value:
+        studyHours !== null ? `${studyHours} hours` : "Loading...",
       change: "",
     },
     {
-      title: "Mock Tests Taken",
-      value: mockTestsTaken === null ? "—" : String(mockTestsTaken),
+      title: "Mock Tests Available",
+      value:
+        availableMockTests !== null ? String(availableMockTests) : "—",
       change: "",
     },
   ];
