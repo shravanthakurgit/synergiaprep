@@ -199,7 +199,7 @@ const AuthForm = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-      <Card className="w-full max-w-4xl relative rounded-3xl overflow-hidden shadow-xl h-[40rem] flex">
+      <Card className="w-full max-w-4xl relative rounded-3xl overflow-hidden shadow-xl h-auto md:h-[40rem] flex flex-col md:flex-row">
         <button
           className="absolute right-4 top-4 text-gray-300 hover:text-white z-10"
           onClick={() => router.push("/")}
@@ -207,38 +207,31 @@ const AuthForm = () => {
           <X className="h-6 w-6" />
         </button>
 
-        <div
-          className={`absolute top-0 w-1/2 h-full bg-gray-50 transition-transform duration-1000 ease-in-out ${
-            isSignUp ? "translate-x-full" : "translate-x-0"
-          }`}
-        >
-          <div className="relative w-full bg-gradient-to-br from-blue-300 to-blue-800 flex flex-col items-center justify-center h-full">
-            <CardHeader>
-              <CardTitle className="text-4xl font-extrabold text-white text-center">
-                Welcome to SynergiaPrep!
-              </CardTitle>
-              <p className="text-white mt-2 text-center text-lg">
-                India&apos;s most trusted education platform
-              </p>
-            </CardHeader>
-            <CardContent>
-              <Image
-                src="/assets/images/Logomark.png"
-                alt="Logo"
-                width={96}
-                height={96}
-                className="opacity-70 mt-6 object-contain"
-              />
-            </CardContent>
-          </div>
+        {/* Image Section - Shows First on Mobile */}
+        <div className="w-full h-64 md:h-auto md:w-1/2 bg-gradient-to-br from-blue-300 to-blue-800 flex flex-col items-center justify-center p-6 order-1">
+          <CardHeader>
+            <CardTitle className="text-2xl md:text-4xl font-extrabold text-white text-center">
+              Welcome to SynergiaPrep!
+            </CardTitle>
+            <p className="text-white mt-2 text-center text-sm md:text-lg">
+              India&apos;s most trusted education platform
+            </p>
+          </CardHeader>
+          <CardContent>
+            <Image
+              src="/assets/images/Logomark.png"
+              alt="Logo"
+              width={80}
+              height={80}
+              className="opacity-70 mt-4 md:mt-6 object-contain"
+              priority
+            />
+          </CardContent>
         </div>
 
-        <div
-          className={`absolute top-0 w-1/2 h-full bg-gray-50 p-8 flex flex-col justify-center shadow-lg transition-transform duration-1000 ease-in-out ${
-            isSignUp ? "translate-x-0" : "translate-x-full"
-          }`}
-        >
-          <Label className="font-semibold text-gray-800 text-2xl">
+        {/* Form Section - Shows Second on Mobile */}
+        <div className="w-full md:w-1/2 bg-gray-50 p-6 md:p-8 flex flex-col justify-center shadow-lg order-2">
+          <Label className="font-semibold text-gray-800 text-xl md:text-2xl mb-4 md:mb-6">
             {isSignUp
               ? "Sign Up"
               : isForgotPassword
@@ -246,11 +239,11 @@ const AuthForm = () => {
                 : "Sign In"}
           </Label>
 
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             {isSignUp ? (
-              <div className="space-y-2">
+              <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="font-light text-gray-800">
+                  <Label htmlFor="phone" className="font-light text-gray-800 text-sm md:text-base">
                     Mobile number
                   </Label>
                   <Input
@@ -259,12 +252,12 @@ const AuthForm = () => {
                     placeholder="Enter your mobile number"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg shadow-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg shadow-md focus:ring-2 focus:ring-blue-500 text-sm md:text-base"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="font-light text-gray-800">
+                  <Label htmlFor="email" className="font-light text-gray-800 text-sm md:text-base">
                     Email Address
                   </Label>
                   <Input
@@ -275,14 +268,14 @@ const AuthForm = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={isVerificationOtpSent || loading}
                     required
-                    className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg shadow-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg shadow-md focus:ring-2 focus:ring-blue-500 text-sm md:text-base"
                   />
                 </div>
                 {isVerificationOtpSent && (
                   <div className="space-y-4">
                     <Label
                       htmlFor="otp"
-                      className="font-semibold text-gray-700 text-lg"
+                      className="font-semibold text-gray-700 text-base md:text-lg"
                     >
                       Enter OTP sent to your EMAIL
                     </Label>
@@ -294,13 +287,13 @@ const AuthForm = () => {
                       onChange={(e) => setVerificationOtp(e.target.value)}
                       disabled={loading}
                       required
-                      className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg shadow-md focus:ring-2 focus:ring-green-500"
+                      className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg shadow-md focus:ring-2 focus:ring-green-500 text-sm md:text-base"
                     />
                   </div>
                 )}
                 <Button
                   type="submit"
-                  className="w-full bg-purple-600 hover:bg-purple-700"
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-sm md:text-base py-3 md:py-2"
                   disabled={loading}
                   onClick={
                     isVerificationOtpSent
@@ -318,7 +311,7 @@ const AuthForm = () => {
             ) : isForgotPassword ? (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="font-light text-gray-800">
+                  <Label htmlFor="email" className="font-light text-gray-800 text-sm md:text-base">
                     Email
                   </Label>
                   <Input
@@ -327,7 +320,7 @@ const AuthForm = () => {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg shadow-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg shadow-md focus:ring-2 focus:ring-blue-500 text-sm md:text-base"
                     required
                     disabled={loading || isResetOtpVerified}
                   />
@@ -336,7 +329,7 @@ const AuthForm = () => {
                 {!isResetOtpSent && (
                   <Button
                     type="submit"
-                    className="w-full bg-purple-600 hover:bg-purple-700"
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-sm md:text-base py-3 md:py-2"
                     disabled={loading}
                     onClick={handleRequestResetOTP}
                   >
@@ -349,7 +342,7 @@ const AuthForm = () => {
                     <div className="space-y-2">
                       <Label
                         htmlFor="reset-otp"
-                        className="font-light text-gray-800"
+                        className="font-light text-gray-800 text-sm md:text-base"
                       >
                         OTP
                       </Label>
@@ -359,14 +352,14 @@ const AuthForm = () => {
                         placeholder="Enter OTP"
                         value={resetOtp}
                         onChange={(e) => setResetOtp(e.target.value)}
-                        className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg shadow-md focus:ring-2 focus:ring-green-500"
+                        className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg shadow-md focus:ring-2 focus:ring-green-500 text-sm md:text-base"
                         required
                         disabled={loading}
                       />
                     </div>
                     <Button
                       type="submit"
-                      className="w-full bg-purple-600 hover:bg-purple-700"
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-sm md:text-base py-3 md:py-2"
                       disabled={loading}
                       onClick={handleVerifyResetOTP}
                     >
@@ -380,7 +373,7 @@ const AuthForm = () => {
                     <div className="space-y-2">
                       <Label
                         htmlFor="reset-password"
-                        className="font-light text-gray-800"
+                        className="font-light text-gray-800 text-sm md:text-base"
                       >
                         New Password
                       </Label>
@@ -390,14 +383,14 @@ const AuthForm = () => {
                         placeholder="Enter new password"
                         value={resetPassword}
                         onChange={(e) => setResetPassword(e.target.value)}
-                        className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg shadow-md focus:ring-2 focus:ring-purple-500"
+                        className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg shadow-md focus:ring-2 focus:ring-purple-500 text-sm md:text-base"
                         required
                       />
                     </div>
                     <div className="space-y-2">
                       <Label
                         htmlFor="reset-confirm"
-                        className="font-light text-gray-800"
+                        className="font-light text-gray-800 text-sm md:text-base"
                       >
                         Confirm Password
                       </Label>
@@ -409,13 +402,13 @@ const AuthForm = () => {
                         onChange={(e) =>
                           setResetConfirmPassword(e.target.value)
                         }
-                        className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg shadow-md focus:ring-2 focus:ring-purple-500"
+                        className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg shadow-md focus:ring-2 focus:ring-purple-500 text-sm md:text-base"
                         required
                       />
                     </div>
                     <Button
                       type="submit"
-                      className="w-full bg-purple-600 hover:bg-purple-700"
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-sm md:text-base py-3 md:py-2"
                       disabled={loading}
                       onClick={handleResetPassword}
                     >
@@ -424,7 +417,7 @@ const AuthForm = () => {
                   </>
                 )}
 
-                <p className="text-sm text-gray-600 mt-4 text-center">
+                <p className="text-xs md:text-sm text-gray-600 mt-4 text-center">
                   Remembered your password?{" "}
                   <button
                     onClick={() => {
@@ -445,7 +438,7 @@ const AuthForm = () => {
             ) : (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="font-light text-gray-800">
+                  <Label htmlFor="email" className="font-light text-gray-800 text-sm md:text-base">
                     Email
                   </Label>
                   <Input
@@ -454,7 +447,7 @@ const AuthForm = () => {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg shadow-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg shadow-md focus:ring-2 focus:ring-blue-500 text-sm md:text-base"
                     required
                     disabled={isPending}
                   />
@@ -462,7 +455,7 @@ const AuthForm = () => {
                 <div className="space-y-2">
                   <Label
                     htmlFor="password"
-                    className="font-light text-gray-800"
+                    className="font-light text-gray-800 text-sm md:text-base"
                   >
                     Password
                   </Label>
@@ -472,21 +465,21 @@ const AuthForm = () => {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg shadow-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg shadow-md focus:ring-2 focus:ring-blue-500 text-sm md:text-base"
                     required
                     disabled={isPending}
                   />
                 </div>
                 <Button
                   type="submit"
-                  className="w-full bg-purple-600 hover:bg-purple-700"
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-sm md:text-base py-3 md:py-2"
                   disabled={isPending}
                   onClick={signInHandler}
                 >
                   {isPending ? "Processing..." : "Sign In"}
                 </Button>
                 <p
-                  className="text-sm text-blue-500 hover:underline text-center mt-2 cursor-pointer"
+                  className="text-xs md:text-sm text-blue-500 hover:underline text-center mt-2 cursor-pointer"
                   onClick={() => setIsForgotPassword(true)}
                 >
                   Forgot Password?
@@ -495,10 +488,10 @@ const AuthForm = () => {
             )}
 
             {error && (
-              <p className="text-sm text-red-500 text-center">{error}</p>
+              <p className="text-xs md:text-sm text-red-500 text-center">{error}</p>
             )}
           </div>
-          <p className="text-sm text-gray-600 mt-4">
+          <p className="text-xs md:text-sm text-gray-600 mt-4 text-center">
             {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
             <button
               onClick={() => setIsSignUp(!isSignUp)}

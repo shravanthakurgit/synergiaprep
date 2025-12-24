@@ -274,10 +274,10 @@ export default function Page() {
             Featured Courses
           </h2>
 
-          <div className="flex justify-center gap-6">
+          <div className="flex flex-wrap justify-center gap-6">
             {/* WBJEE */}
             <Card
-              className="w-80 cursor-pointer hover:scale-105 transition pointer-events-auto"
+              className="w-full sm:w-80 max-w-sm cursor-pointer hover:scale-105 transition-transform duration-200"
               onClick={() =>
                 handleCardClick({
                   id: "1",
@@ -296,7 +296,7 @@ export default function Page() {
                 })
               }
             >
-                <CardContent className="p-0 pointer-events-none">
+                <CardContent className="p-0">
                 <Image
                   src="/assets/images/jee_course.jpg"
                   alt="WBJEE"
@@ -329,11 +329,11 @@ export default function Page() {
             <p className="text-sm text-gray-700">You have no courses yet.</p>
           )}
 
-          <div className="flex flex-wrap gap-6">
+          <div className="flex flex-wrap gap-6 justify-center">
             {courses && courses.map((c) => (
               <Card
                 key={c.id}
-                className="w-80 cursor-pointer hover:scale-105 transition"
+                className="w-full sm:w-80 max-w-sm cursor-pointer hover:scale-105 transition-transform duration-200"
                 onClick={() => handleCardClick(c)}
               >
                 <CardContent className="p-0">
@@ -360,14 +360,48 @@ export default function Page() {
         </div>
 
         {selectedCourse && (
-          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center">
-            <Card className="max-w-3xl w-full pointer-events-auto">
-              <CardHeader>
-                <CardTitle>{selectedCourse.title}</CardTitle>
+          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+            <Card className="w-full max-w-3xl mx-auto rounded-xl overflow-y-auto max-h-[90vh]">
+              <CardHeader className="sticky top-0 bg-white/80 backdrop-blur-md">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg sm:text-2xl">{selectedCourse.title}</CardTitle>
+                  <Button variant="ghost" onClick={handleCloseOverlay} className="text-gray-600 hover:text-gray-900">
+                    ✕
+                  </Button>
+                </div>
               </CardHeader>
-              <CardContent>
-                <p>{selectedCourse.courseContent}</p>
-                <Button onClick={handleCloseOverlay} className="pointer-events-auto">Close</Button>
+              <CardContent className="space-y-4 p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <div className="flex-shrink-0 w-full sm:w-60">
+                    {selectedCourse.image ? (
+                      <Image
+                        src={selectedCourse.image}
+                        alt={selectedCourse.title}
+                        width={240}
+                        height={135}
+                        className="w-full h-40 sm:h-36 object-cover rounded-md"
+                      />
+                    ) : (
+                      <div className="w-full h-36 bg-gray-100 rounded-md" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-2xl font-bold">{selectedCourse.price === 0 ? "Free" : `₹${selectedCourse.price}`}</p>
+                    <p className="text-sm text-gray-600">Mode of Learning: {selectedCourse.modeOfLearning}</p>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">Course Content</h3>
+                  <p className="text-sm text-gray-700 whitespace-pre-line">{selectedCourse.courseContent}</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
+                    <Link href={`/checkout?courseId=${selectedCourse.id}`}>Buy Now</Link>
+                  </Button>
+                  <Button asChild variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50">
+                    <Link href={`/courses/${selectedCourse.id}/mock-test`}>Take a Free Mock Test</Link>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>

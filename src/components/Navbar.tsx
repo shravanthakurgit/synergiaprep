@@ -27,7 +27,8 @@ import productsData from "@/tempdata/products.json";
 const products = productsData.products;
 
 export function Navbar() {
-  const [isOpen, setIsOpen] = useState(true);
+  // Mobile menu should be closed by default
+  const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(true); // Mock for testing, replace with auth system
   const router = useRouter();
 
@@ -60,20 +61,20 @@ export function Navbar() {
           <NavigationMenuList className="flex space-x-3">
             {/* Home */}
             <NavigationMenuItem>
-              <Link href="/">
-                <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "p-2 bg-[#0f3bfe] cursor-pointer")}>
+              <NavigationMenuLink asChild>
+                <Link href="/" className={cn(navigationMenuTriggerStyle(), "p-2 bg-[#0f3bfe] cursor-pointer")}>
                   Home
-                </NavigationMenuLink>
-              </Link>
+                </Link>
+              </NavigationMenuLink>
             </NavigationMenuItem>
 
             {/* About Us */}
             <NavigationMenuItem>
-              <Link href="/about">
-                <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "p-2 bg-[#0f3bfe] cursor-pointer")}>
+              <NavigationMenuLink asChild>
+                <Link href="/about" className={cn(navigationMenuTriggerStyle(), "p-2 bg-[#0f3bfe] cursor-pointer")}>
                   About Us
-                </NavigationMenuLink>
-              </Link>
+                </Link>
+              </NavigationMenuLink>
             </NavigationMenuItem>
 
             {/* SynergiaTech Dropdown */}
@@ -110,29 +111,29 @@ export function Navbar() {
 
             {/* Study Abroad */}
             <NavigationMenuItem>
-              <Link href="/study-abroad">
-                <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "p-2 bg-[#0f3bfe] cursor-pointer")}>
+              <NavigationMenuLink asChild>
+                <Link href="/study-abroad" className={cn(navigationMenuTriggerStyle(), "p-2 bg-[#0f3bfe] cursor-pointer")}>
                   Study Abroad
-                </NavigationMenuLink>
-              </Link>
+                </Link>
+              </NavigationMenuLink>
             </NavigationMenuItem>
 
             {/* Blog */}
             <NavigationMenuItem>
-              <Link href="/blog">
-                <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "p-2 bg-[#0f3bfe] cursor-pointer")}>
+              <NavigationMenuLink asChild>
+                <Link href="/blog" className={cn(navigationMenuTriggerStyle(), "p-2 bg-[#0f3bfe] cursor-pointer")}>
                   Blog
-                </NavigationMenuLink>
-              </Link>
+                </Link>
+              </NavigationMenuLink>
             </NavigationMenuItem>
 
             {/* Contact Us */}
             <NavigationMenuItem>
-              <Link href="/contact-us">
-                <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "p-2 bg-[#0f3bfe] cursor-pointer")}>
+              <NavigationMenuLink asChild>
+                <Link href="/contact-us" className={cn(navigationMenuTriggerStyle(), "p-2 bg-[#0f3bfe] cursor-pointer")}>
                   Contact Us
-                </NavigationMenuLink>
-              </Link>
+                </Link>
+              </NavigationMenuLink>
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
@@ -147,7 +148,12 @@ export function Navbar() {
 
         {/* Mobile Toggle */}
         <div className="lg:hidden">
-          <button onClick={() => setIsOpen(!isOpen)}>
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            aria-expanded={isOpen}
+            aria-label={isOpen ? "Close menu" : "Open menu"}
+            className="p-2"
+          >
             {isOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
