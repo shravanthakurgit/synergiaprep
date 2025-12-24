@@ -12,7 +12,7 @@ export function Hero() {
   return (
     <>
       {/* Hero section */}
-      <section className="w-full bg-[#0055ff] py-12 md:py-20 lg:py-28 relative z-0">
+      <section className="w-full bg-[#0055ff] py-20 md:py-20 lg:py-28 relative z-0 ">
         <div className="max-w-7xl mx-auto flex flex-col-reverse lg:flex-row items-center px-4 sm:px-6 md:px-8 gap-8 md:gap-12 lg:gap-16">
           
           {/* Left Side with GRID Background */}
