@@ -1,15 +1,16 @@
-
 "use client";
 
 import * as React from "react";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import CourseCard from "@/components/course-card";
 import { Separator } from "@/components/ui/separator";
 import FAQ from "@/components/Faq";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 
-// Types
+/* ================= TYPES ================= */
+
 interface Course {
   courseId: string;
   banner: string;
@@ -28,7 +29,8 @@ interface PageLayoutProps {
   children: React.ReactNode;
 }
 
-// Reusable hook for data fetching
+/* ================= DATA HOOK ================= */
+
 const useData = <T,>(url: string) => {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
@@ -47,9 +49,7 @@ const useData = <T,>(url: string) => {
         const jsonData = await response.json();
         setData(jsonData.courses);
       } catch (err: unknown) {
-        setError(
-          err instanceof Error ? err.message : "An unknown error occurred."
-        );
+        setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setLoading(false);
       }
@@ -61,15 +61,18 @@ const useData = <T,>(url: string) => {
   return { data, loading, error };
 };
 
-// Reusable components
+/* ================= LAYOUT ================= */
+
 const PageLayout = ({ children }: PageLayoutProps) => (
-  <div className="min-h-screen w-full m-0 p-0 bg-gradient-to-b from-[#0f3bfe] via-blue-400 dark:via-blue-900 to-blue-500 pt-20">
+  <div className="min-h-screen w-full bg-gradient-to-b from-[#0f3bfe] via-blue-400 dark:via-blue-900 to-blue-500 pt-20">
     {children}
   </div>
 );
 
+/* ================= SKELETONS ================= */
+
 const SkeletonCard = () => (
-  <div className="min-w-[300px] max-w-[350px] h-[500px] bg-gray-200 rounded-lg shadow-md">
+  <div className="w-full max-w-[350px] h-[500px] bg-gray-200 rounded-lg shadow-md">
     <Skeleton className="h-48 w-full rounded-t-lg" />
     <div className="p-4">
       <Skeleton className="h-6 w-2/3 mb-2" />
@@ -81,9 +84,9 @@ const SkeletonCard = () => (
 
 const LoadingSkeleton = () => (
   <PageLayout>
-    <div className="max-w-7xl mx-auto px-4 py-10 flex flex-row flex-wrap gap-5 justify-center">
+    <div className="max-w-7xl mx-auto px-4 py-10 flex flex-wrap gap-5 justify-center">
       {[...Array(6)].map((_, index) => (
-        <SkeletonCard key={`skeleton-${index}`} />
+        <SkeletonCard key={index} />
       ))}
     </div>
     <Separator className="my-4" />
@@ -91,65 +94,83 @@ const LoadingSkeleton = () => (
   </PageLayout>
 );
 
-const CourseGrid = ({ courses }: { courses: Course[] }) => (
-  <div className="py-12">
-    <motion.div
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="text-center text-white mb-8"
-    >
-      <h1 className="text-4xl md:text-5xl font-bold mb-4">Study Abroad</h1>
-      <p className="text-lg md:text-xl">Explore global education opportunities</p>
-    </motion.div>
-    <div className="max-w-7xl mx-auto px-4 flex flex-row flex-wrap gap-5 justify-center">
-      {courses.map((course, index) => (
-        <motion.div
-          key={course.courseId}
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3, delay: index * 0.1 }}
-          className="min-w-[300px] max-w-[350px] h-[500px]"
-        >
-          <CourseCard
-            className="h-full flex flex-col bg-white/10 backdrop-blur-sm border-none text-white"
-            course={{
-              id: course.courseId ?? "",
-              thumbnailUrl: course.banner ?? "/assets/images/placeholder.jpg",
-              title: course.title ?? "Untitled Course",
-              subtitle: course.summary ?? "",
-              description: course.objective ?? "",
-              instructor: course.coordinator ?? "Unknown Instructor",
-              rating: 0,
-              reviewCount: 0,
-              enrollmentCount: 0,
-              price: 0,
-              discount: 0,
-              bestseller: false,
-              level: (((): "BASIC" | "STANDARD" | "PREMIUM" => {
-                const l = (course.level ?? "").toUpperCase();
-                return l === "BASIC" || l === "STANDARD" || l === "PREMIUM"
-                  ? (l as "BASIC" | "STANDARD" | "PREMIUM")
-                  : "BASIC";
-              })()),
-              examCategories: [],
-              exams: [],
-            }}
-            onOpenPreview={() => alert(`Preview for ${course.title ?? "course"}`)}
-          />
-        </motion.div>
-      ))}
+/* ================= COURSE GRID ================= */
+
+const CourseGrid = ({ courses }: { courses: Course[] }) => {
+  const router = useRouter();
+
+  const handlePreview = (courseId: string) => {
+    router.push(`/study-abroad/${courseId}`);
+  };
+
+  return (
+    <div className="py-12">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="text-center text-white mb-8 px-4"
+      >
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+          Study Abroad
+        </h1>
+        <p className="text-base sm:text-lg md:text-xl">
+          Explore global education opportunities
+        </p>
+      </motion.div>
+
+      <div className="max-w-7xl mx-auto px-4 flex flex-wrap gap-5 justify-center">
+        {courses.map((course, index) => (
+          <motion.div
+            key={course.courseId}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, delay: index * 0.08 }}
+            className="w-full max-w-[350px] h-[500px]"
+          >
+            <CourseCard
+              className="h-[86%] flex flex-col bg-white/20 backdrop-blur-md border border-white/20 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 text-white"
+              course={{
+                id: course.courseId,
+                thumbnailUrl: course.banner || "/assets/images/placeholder.jpg",
+                title: course.title || "Untitled Course",
+                subtitle: course.summary || "",
+                description: course.objective || "",
+                instructor: course.coordinator || "Unknown Instructor",
+                rating: 0,
+                reviewCount: 0,
+                enrollmentCount: 0,
+                price: 0,
+                discount: 0,
+                bestseller: false,
+                level: (() => {
+                  const l = course.level?.toUpperCase();
+                  return l === "BASIC" || l === "STANDARD" || l === "PREMIUM"
+                    ? l
+                    : "BASIC";
+                })(),
+                examCategories: [],
+                exams: [],
+              }}
+              onOpenPreview={() => handlePreview(course.courseId)}
+            />
+          </motion.div>
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
-// Main Page component
+/* ================= PAGE ================= */
+
 export default function Page() {
-  const { data: courses, loading, error } = useData<Course[]>("/api/study-abroad/all");
+  const {
+    data: courses,
+    loading,
+    error,
+  } = useData<Course[]>("/api/study-abroad/all");
 
-  if (loading) {
-    return <LoadingSkeleton />;
-  }
+  if (loading) return <LoadingSkeleton />;
 
   if (error) {
     return (

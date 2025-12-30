@@ -26,17 +26,16 @@ import { useRouter } from "next/navigation";
 export const AboutCompany = () => {
   const router = useRouter();
 
-  // Handle scrolling to section on page load with offset for navbar and header
+  // Handle scrolling to section on page load with offset
   useEffect(() => {
     const hash = window.location.hash;
     if (hash) {
       const sectionId = hash.replace("#", "");
       const element = document.getElementById(sectionId);
       if (element) {
-        const navbarHeight = 60; // Approximate navbar height (adjust if needed)
-        const headerHeight = 100; // Approximate header height (mb-8 md:mb-12 + h2)
-        const offset = navbarHeight + headerHeight;
-        const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+        const offset = 160;
+        const elementPosition =
+          element.getBoundingClientRect().top + window.scrollY;
         window.scrollTo({
           top: elementPosition - offset,
           behavior: "smooth",
@@ -56,140 +55,125 @@ export const AboutCompany = () => {
       icon: Star,
       title: "Excellence",
       description:
-        "Committed to delivering the highest quality of learning experiences, leveraging expertise from top academic institutions and technological innovations.",
+        "Committed to delivering the highest quality of learning experiences through expertise and innovation.",
     },
     {
       icon: Lightbulb,
       title: "Innovation",
       description:
-        "Prioritizing continuous technological advancement in AI/ML, Materials Science, and IoT to redefine how education and career preparation are approached.",
+        "Continuously advancing technology in AI/ML, Materials Science, and IoT to redefine education.",
     },
     {
       icon: CheckCircle,
       title: "Empowerment",
       description:
-        "Empowering students to take control of their academic and professional journeys through personalized guidance and progress tracking.",
+        "Helping students take control of their academic and professional journeys.",
     },
     {
       icon: Globe,
       title: "Global Perspective",
       description:
-        "Offering study-abroad consultations and international certification courses to prepare students for global opportunities and cross-border collaborations.",
+        "Preparing students for global opportunities through international programs.",
     },
     {
       icon: Shield,
       title: "Integrity",
       description:
-        "Maintaining transparency and trust in all services, ensuring fairness and reliability for students, partners, and stakeholders.",
+        "Maintaining transparency, trust, and fairness in everything we do.",
     },
     {
       icon: Users,
       title: "Collaboration",
       description:
-        "Forging meaningful partnerships with academic institutions, industry leaders, and global entities to create an ecosystem that fosters success and innovation.",
+        "Building strong partnerships with institutions and industry leaders.",
     },
   ];
 
   const missionHighlights = [
-    "To empower students across diverse fields and career aspirations by delivering a cutting-edge educational platform that enables them to prepare, practice, and succeed in their exams",
-    "We are committed to being a reliable partner in every student's journey to success, regardless of their chosen path",
-    "Through our AI/ML-powered tools, we provide personalized exam preparation, progress tracking, and insights to optimize learning outcomes",
-    "We bridge academic and professional growth by offering internships, short-term certification courses with leading foreign universities, and innovative technological solutions",
-    "By fostering innovation in AI/ML, Materials Science, and IoT, we aim to redefine the educational landscape while nurturing global opportunities through study-abroad consultations",
+    "Empowering students across diverse fields with cutting-edge educational solutions",
+    "Being a reliable partner in every student’s journey to success",
+    "Providing AI/ML-powered personalized exam preparation and insights",
+    "Bridging academic and professional growth through internships and certifications",
+    "Creating global opportunities via innovation and study-abroad consultations",
   ];
 
   return (
-    <div
-      className="min-h-screen"
-      // style={{
-      //   backgroundImage: "url(/assets/images/missionvalues.webp)",
-      //   backgroundSize: "cover",
-      //   backgroundPosition: "center",
-      // }}
-    >
-      {/* <div className="absolute inset-0 bg-black/50" /> */}
+    <div className="min-h-screen">
+      <div className="w-full px-4 py-10 md:py-20 flex flex-col items-center bg-gradient-to-b from-[#3a59e4] via-blue-400 to-blue-300 text-white">
+        <div className="max-w-6xl w-full text-center">
+          {/* Heading */}
+          <h2 className="text-3xl md:text-4xl font-bold mb-12">
+            Transforming Education, Empowering Futures
+          </h2>
 
-      <div className="w-full relative px-4 py-8 md:py-16 justify-center items-center flex flex-col bg-gradient-to-b from-[#3a59e4] via-blue-400 dark:via-blue-900 to-blue-300">
-        <div className="w-full text-center">
-          <div className="mb-8 md:mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">
-              Transforming Education, Empowering Futures
-            </h2>
-          </div>
-
-          <Card id="mission" className="w-full border-none bg-transparent text-white mb-6 md:mb-10 shadow-none">
+          {/* Mission */}
+          <Card
+            id="mission"
+            className="bg-transparent border-none shadow-none mb-16"
+          >
             <CardHeader>
-              <CardTitle className="flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="flex items-center space-x-3">
-                  <Rocket className="w-8 h-8" />
-                  <span className="text-xl md:text-2xl font-bold">
-                    Our Mission
-                  </span>
-                </div>
+              <CardTitle className="flex items-center justify-center gap-3 text-2xl">
+                <Rocket className="w-7 h-7" />
+                Our Mission
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3 backdrop-blur-sm">
-                {missionHighlights.map((highlight, index) => (
-                  <React.Fragment key={highlight}>
-                    <div className="flex items-start space-x-3 text-left">
-                      <Target className="w-5 h-5 mt-1 flex-shrink-0" />
-                      <span className="text-sm md:text-base">
-                        {highlight}
-                      </span>
-                    </div>
-                    {index < missionHighlights.length - 1 && <Separator />}
-                  </React.Fragment>
-                ))}
-              </div>
+            <CardContent className="space-y-4">
+              {missionHighlights.map((item, index) => (
+                <React.Fragment key={item}>
+                  <div className="flex items-start gap-3 text-left">
+                    <Target className="w-5 h-5 mt-1" />
+                    <p className="text-sm md:text-base">{item}</p>
+                  </div>
+                  {index < missionHighlights.length - 1 && <Separator />}
+                </React.Fragment>
+              ))}
             </CardContent>
           </Card>
 
-          <div className="flex flex-col lg:flex-row w-full gap-6 pt-20">
-            <Card id="vision" className="w-full border-none bg-transparent text-white mb-6 md:mb-10 shadow-none">
-              <CardHeader>
-                <CardTitle className="text-xl md:text-2xl flex items-center justify-center">
-                  <Eye className="mr-3 w-6 h-6" />
-                  Our Vision
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-sm md:text-base">
-                <p>
-                  To be the most trusted and innovative EduTech platform globally,
-                  transforming the way students learn, prepare, and succeed in
-                  their chosen paths. We envision creating a future where every
-                  student, regardless of their field or location, has access to
-                  advanced technology-driven education that inspires confidence
-                  and unlocks their full potential.
-                </p>
-                <p className="mt-5">
-                  We aspire to lead in educational innovation, not only by setting
-                  new standards in exam preparation but also by empowering
-                  individuals with skills for the industries of tomorrow through
-                  technological advancements and global opportunities.
-                </p>
-              </CardContent>
-            </Card>
-            <div className="w-full block lg:relative">
-              <Image
-                src="/assets/images/unsplash1.jpg"
-                alt="Mission and Values"
-                width={400}
-                height={400}
-                className="rounded-lg absolute top-0 right-0 shadow-lg hidden lg:block"
-              />
-              <Image
-                src="/assets/images/unsplash2.jpg"
-                alt="Mission and Values"
-                width={600}
-                height={200}
-                className="rounded-lg lg:absolute lg:bottom-0 lg:left-0 shadow-lg"
-              />
-            </div>
+          {/* Vision */}
+          <Card
+            id="vision"
+            className="bg-transparent border-none shadow-none mb-10"
+          >
+            <CardHeader>
+              <CardTitle className="flex items-center justify-center gap-3 text-2xl">
+                <Eye className="w-6 h-6" />
+                Our Vision
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm md:text-base space-y-4">
+              <p>
+                To be the most trusted and innovative EduTech platform globally,
+                transforming how students learn, prepare, and succeed.
+              </p>
+              <p>
+                We aim to unlock every learner’s potential by combining advanced
+                technology with global educational opportunities.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* ✅ IMAGES BELOW VISION */}
+          <div className="mt-10 md:mt-16 grid grid-cols-1 md:grid-cols-2 gap-6 px-2 md:px-10">
+            <Image
+              src="/assets/images/unsplash1.jpg"
+              alt="Learning Environment"
+              width={600}
+              height={400}
+              className="w-full h-64 md:h-72 rounded-xl object-cover shadow-lg hover:scale-[1.02] transition-transform duration-300"
+            />
+            <Image
+              src="/assets/images/unsplash2.jpg"
+              alt="Future Ready Education"
+              width={600}
+              height={400}
+              className="w-full h-64 md:h-72 rounded-xl object-cover shadow-lg hover:scale-[1.02] transition-transform duration-300"
+            />
           </div>
 
-          <div id="core-values" className="mt-8 container md:mt-40">
-            <h3 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8 text-white">
+          {/* Core Values */}
+          <div id="core-values" className="mt-20">
+            <h3 className="text-2xl md:text-3xl font-bold mb-8">
               Our Core Values
             </h3>
             <Accordion type="single" collapsible className="w-full">
@@ -197,17 +181,15 @@ export const AboutCompany = () => {
                 <AccordionItem
                   key={value.title}
                   value={`item-${index}`}
-                  className="backdrop-blur-sm mb-2 rounded-lg text-white"
+                  className="mb-2 rounded-lg backdrop-blur-sm"
                 >
                   <AccordionTrigger className="px-4">
-                    <div className="flex items-center justify-center">
-                      <value.icon className="mr-3 w-5 h-5 text-white" />
-                      <span className="text-sm md:text-base">
-                        {value.title}
-                      </span>
+                    <div className="flex items-center gap-3">
+                      <value.icon className="w-5 h-5" />
+                      <span>{value.title}</span>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="px-4 text-white text-sm md:text-base">
+                  <AccordionContent className="px-4 text-sm md:text-base">
                     {value.description}
                   </AccordionContent>
                 </AccordionItem>

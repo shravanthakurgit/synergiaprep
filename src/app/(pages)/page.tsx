@@ -32,7 +32,8 @@ const Certifications = () => {
           Upgrade Your Skills With Certificate Courses
         </h1>
         <p className="text-lg px-4 max-w-3xl mx-auto text-gray-100">
-          Revolutionizing learning through cutting-edge technology and personalized solutions
+          Revolutionizing learning through cutting-edge technology and
+          personalized solutions
         </p>
 
         {/* Centered Image with Rounded Corners and Explore More Button */}
@@ -121,14 +122,14 @@ const Certifications = () => {
           alt="Study 4"
           width={600}
           height={288}
-          className="h-72 rounded-xl shadow-md w-full object-fill"
+          className="h-72 w-full rounded-xl shadow-md object-cover"
         />
         <Image
           src={images.img6}
           alt="Study 6"
           width={600}
           height={288}
-          className="h-72 rounded-xl shadow-md w-full object-fill"
+          className="h-72 w-full rounded-xl shadow-md object-cover object-[center_10%]"
         />
       </div>
     </div>

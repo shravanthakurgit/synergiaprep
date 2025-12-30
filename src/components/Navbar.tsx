@@ -29,16 +29,10 @@ const products = productsData.products;
 export function Navbar() {
   // Mobile menu should be closed by default
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(true); // Mock for testing, replace with auth system
   const router = useRouter();
 
   const handleLinkClick = () => {
     setIsOpen(false);
-  };
-
-  const handleExamPrepClick = () => {
-    router.push(isLoggedIn ? "/examprep" : "/404");
-    handleLinkClick();
   };
 
   return (
@@ -62,7 +56,13 @@ export function Navbar() {
             {/* Home */}
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
-                <Link href="/" className={cn(navigationMenuTriggerStyle(), "p-2 bg-[#0f3bfe] cursor-pointer")}>
+                <Link
+                  href="/"
+                  className={cn(
+                    navigationMenuTriggerStyle(),
+                    "p-2 bg-[#0f3bfe] cursor-pointer"
+                  )}
+                >
                   Home
                 </Link>
               </NavigationMenuLink>
@@ -71,7 +71,13 @@ export function Navbar() {
             {/* About Us */}
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
-                <Link href="/about" className={cn(navigationMenuTriggerStyle(), "p-2 bg-[#0f3bfe] cursor-pointer")}>
+                <Link
+                  href="/about"
+                  className={cn(
+                    navigationMenuTriggerStyle(),
+                    "p-2 bg-[#0f3bfe] cursor-pointer"
+                  )}
+                >
                   About Us
                 </Link>
               </NavigationMenuLink>
@@ -88,7 +94,11 @@ export function Navbar() {
                     <ListItem
                       key={product.title}
                       title={product.title}
-                      href={product.title === "Chemicals and Instruments" ? "/products/instruments-and-chemicals" : product.href}
+                      href={
+                        product.title === "Chemicals and Instruments"
+                          ? "/products/instruments-and-chemicals"
+                          : product.href
+                      }
                       className="hover:bg-indigo-100"
                       onClick={handleLinkClick}
                     >
@@ -99,20 +109,31 @@ export function Navbar() {
               </NavigationMenuContent>
             </NavigationMenuItem>
 
-            {/* Exam Prep */}
+            {/* Exam Prep - Fixed */}
             <NavigationMenuItem>
-              <NavigationMenuLink
-                className={cn(navigationMenuTriggerStyle(), "p-2 bg-[#0f3bfe] cursor-pointer")}
-                onClick={handleExamPrepClick}
-              >
-                ExamPrep
+              <NavigationMenuLink asChild>
+                <Link
+                  href="/examprep"
+                  className={cn(
+                    navigationMenuTriggerStyle(),
+                    "p-2 bg-[#0f3bfe] cursor-pointer"
+                  )}
+                >
+                  ExamPrep
+                </Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
 
             {/* Study Abroad */}
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
-                <Link href="/study-abroad" className={cn(navigationMenuTriggerStyle(), "p-2 bg-[#0f3bfe] cursor-pointer")}>
+                <Link
+                  href="/study-abroad"
+                  className={cn(
+                    navigationMenuTriggerStyle(),
+                    "p-2 bg-[#0f3bfe] cursor-pointer"
+                  )}
+                >
                   Study Abroad
                 </Link>
               </NavigationMenuLink>
@@ -121,7 +142,13 @@ export function Navbar() {
             {/* Blog */}
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
-                <Link href="/blog" className={cn(navigationMenuTriggerStyle(), "p-2 bg-[#0f3bfe] cursor-pointer")}>
+                <Link
+                  href="/blog"
+                  className={cn(
+                    navigationMenuTriggerStyle(),
+                    "p-2 bg-[#0f3bfe] cursor-pointer"
+                  )}
+                >
                   Blog
                 </Link>
               </NavigationMenuLink>
@@ -130,7 +157,13 @@ export function Navbar() {
             {/* Contact Us */}
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
-                <Link href="/contact-us" className={cn(navigationMenuTriggerStyle(), "p-2 bg-[#0f3bfe] cursor-pointer")}>
+                <Link
+                  href="/contact-us"
+                  className={cn(
+                    navigationMenuTriggerStyle(),
+                    "p-2 bg-[#0f3bfe] cursor-pointer"
+                  )}
+                >
                   Contact Us
                 </Link>
               </NavigationMenuLink>
@@ -138,13 +171,24 @@ export function Navbar() {
           </NavigationMenuList>
         </NavigationMenu>
 
-        {/* Join Now Button */}
-        <Link
-          href="/login"
-          className="ml-4 w-32 bg-white font-semibold text-blue-800 h-12 px-2 py-1 rounded-xl hover:bg-gray-300 hover:text-black transition duration-500 flex items-center justify-center"
-        >
-          Join Now
-        </Link>
+        {/* Right side buttons */}
+        <div className="flex items-center gap-3">
+          {/* Archive Button */}
+          <Link
+            href="/archive"
+            className="hidden lg:flex w-32 bg-transparent border-2 border-white font-semibold text-white h-12 px-2 py-1 rounded-xl hover:bg-white hover:text-blue-800 transition duration-500 items-center justify-center"
+          >
+            Archive
+          </Link>
+
+          {/* Join Now Button */}
+          <Link
+            href="/login"
+            className="w-32 bg-white font-semibold text-blue-800 h-12 px-2 py-1 rounded-xl hover:bg-gray-300 hover:text-black transition duration-500 flex items-center justify-center"
+          >
+            Join Now
+          </Link>
+        </div>
 
         {/* Mobile Toggle */}
         <div className="lg:hidden">
@@ -189,7 +233,11 @@ export function Navbar() {
                 {products.map((product) => (
                   <Link
                     key={product.title}
-                    href={product.title === "Chemicals and Instruments" ? "/products/instruments-and-chemicals" : product.href}
+                    href={
+                      product.title === "Chemicals and Instruments"
+                        ? "/products/instruments-and-chemicals"
+                        : product.href
+                    }
                     className="pl-4 hover:underline"
                     onClick={handleLinkClick}
                   >
@@ -201,7 +249,7 @@ export function Navbar() {
 
             <AccordionItem value="item-4">
               <Link
-                href={isLoggedIn ? "/examprep" : "/404"}
+                href="/examprep"
                 className="flex items-center justify-between py-4 text-sm font-medium transition-all no-underline"
                 onClick={handleLinkClick}
               >
@@ -238,14 +286,35 @@ export function Navbar() {
                 Contact Us
               </Link>
             </AccordionItem>
+
+            {/* Archive for Mobile */}
+            <AccordionItem value="item-8">
+              <Link
+                href="/archive"
+                className="flex items-center justify-between py-4 text-sm font-medium transition-all no-underline"
+                onClick={handleLinkClick}
+              >
+                Archive
+              </Link>
+            </AccordionItem>
           </Accordion>
-          <Link
-            href="/examprep"
-            className="block w-full mt-2 border border-indigo-600 text-indigo-600 px-4 py-2 rounded hover:bg-indigo-50 transition text-center"
-            onClick={handleLinkClick}
-          >
-            Join Now
-          </Link>
+
+          <div className="flex flex-col gap-3">
+            <Link
+              href="/archive"
+              className="block w-full mt-2 border-2 border-blue-600 text-blue-600 px-4 py-2 rounded hover:bg-blue-50 transition text-center font-semibold"
+              onClick={handleLinkClick}
+            >
+              Archive
+            </Link>
+            <Link
+              href="/login"
+              className="block w-full border border-indigo-600 text-indigo-600 px-4 py-2 rounded hover:bg-indigo-50 transition text-center font-semibold"
+              onClick={handleLinkClick}
+            >
+              Join Now
+            </Link>
+          </div>
         </div>
       )}
     </nav>

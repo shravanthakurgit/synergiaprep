@@ -12,6 +12,7 @@ import {
   ChartNoAxesCombined,
   Brain,
   PenLine,
+  Archive,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
@@ -36,33 +37,56 @@ export function AppSidebar({ className }: { className?: string }) {
   const [image, setImage] = useState<string | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState(session?.user.email);
+  const [email, setEmail] = useState(session?.user?.email || "");
 
   useEffect(() => {
     if (session?.user) {
       setImage(session?.user?.image || null);
       const [first, ...last] = session.user.name.split(" ");
-      setFirstName(first);
-      setLastName(last.join(" "));
-      setEmail(session.user.email);
+      setFirstName(first || "");
+      setLastName(last.join(" ") || "");
+      setEmail(session.user.email || "");
     }
   }, [session]);
 
-const basePath = session ? "/examprep" : "/dummy";
+  // Define navigation items based on login status
+  const getNavItems = () => {
+    const basePath = "/examprep";
 
-const navItems = [
-  { 
-    icon: LayoutDashboard, 
-    label: "Dashboard", 
-    href: session ? "/examprep/dashboard" : "/dummy" 
-  },
-  { icon: NotebookPen, label: "Practice", href: `${basePath}/practice` },
-  { icon: FileText, label: "PYQ Bank", href: `${basePath}/pyqbank` },
-  { icon: BookOpen, label: "Mock", href: `${basePath}/mock` },
-  { icon: PenLine, label: "Quiz", href: `${basePath}/quiz` },
-  { icon: Brain, label: "BrainStorm", href: `${basePath}/brainstorm` },
-  { icon: ChartNoAxesCombined, label: "Analysis", href: `${basePath}/analysis` },
-];
+    if (session) {
+      // User is logged in - show all items
+      return [
+        {
+          icon: LayoutDashboard,
+          label: "Dashboard",
+          href: `${basePath}/dashboard`,
+        },
+        { icon: NotebookPen, label: "Practice", href: `${basePath}/practice` },
+        { icon: FileText, label: "PYQ Bank", href: `${basePath}/pyqbank` },
+        { icon: BookOpen, label: "Mock", href: `${basePath}/mock` },
+        { icon: PenLine, label: "Quiz", href: `${basePath}/quiz` },
+        { icon: Brain, label: "BrainStorm", href: `${basePath}/brainstorm` },
+        {
+          icon: ChartNoAxesCombined,
+          label: "Analysis",
+          href: `${basePath}/analysis`,
+        },
+        { icon: Archive, label: "Archive", href: `${basePath}/archive` }, // Added Archive
+      ];
+    } else {
+      // User is NOT logged in - show limited items
+      return [
+        { icon: NotebookPen, label: "Practice", href: `${basePath}/practice` },
+        { icon: FileText, label: "PYQ Bank", href: `${basePath}/pyqbank` },
+        { icon: BookOpen, label: "Mock", href: `${basePath}/mock` },
+        { icon: PenLine, label: "Quiz", href: `${basePath}/quiz` },
+        { icon: Archive, label: "Archive", href: `${basePath}/archive` }, // Added Archive
+        // Dashboard, Brainstorm, and Analysis are NOT included here
+      ];
+    }
+  };
+
+  const navItems = getNavItems();
 
   return (
     <aside
@@ -90,8 +114,8 @@ const navItems = [
         </nav>
       </ScrollArea>
 
-      {/* User Menu Section */}
-      {className !== "w-0" && (
+      {/* User Menu Section - Only show if logged in AND sidebar is open */}
+      {session && className !== "w-0" && (
         <div className="border-t border-b p-2 sticky bottom-0 left-0">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -101,14 +125,14 @@ const navItems = [
               >
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={image || undefined} alt={firstName} />
-                  <AvatarFallback>{firstName[0]}</AvatarFallback>
+                  <AvatarFallback>{firstName[0] || "U"}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">
-                    {firstName + " " + lastName}
+                    {firstName + " " + lastName || "User"}
                   </span>
                   <span className="truncate text-xs text-muted-foreground">
-                    {email}
+                    {email || ""}
                   </span>
                 </div>
                 <ChevronsUpDown className="ml-auto h-4 w-4" />
@@ -124,14 +148,14 @@ const navItems = [
                 <div className="flex items-center gap-2 p-1">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={image || undefined} alt={firstName} />
-                    <AvatarFallback>{firstName[0]}</AvatarFallback>
+                    <AvatarFallback>{firstName[0] || "U"}</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">
-                      {firstName + " " + lastName}
+                      {firstName + " " + lastName || "User"}
                     </span>
                     <span className="truncate text-xs text-muted-foreground">
-                      {email}
+                      {email || ""}
                     </span>
                   </div>
                 </div>
@@ -150,7 +174,9 @@ const navItems = [
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => signOut()}>
+              <DropdownMenuItem
+                onClick={() => signOut({ callbackUrl: "/examprep" })}
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 Log out
               </DropdownMenuItem>

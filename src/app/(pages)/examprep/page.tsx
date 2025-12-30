@@ -14,6 +14,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useSession } from "next-auth/react";
+import DemoPage from "./demopage/page"; // Import the DemoPage component
 
 interface ExamCategories {
   id: string;
@@ -30,6 +31,8 @@ const ExamPrepPage = () => {
   const [loading, setLoading] = useState(false);
   const [exams, setExams] = useState<ExamCategories[]>([]);
 
+  const isLoggedIn = !!session?.user;
+
   useEffect(() => {
     const fetchExamCatergories = async () => {
       try {
@@ -38,10 +41,8 @@ const ExamPrepPage = () => {
         setExams(result.data || []);
       } catch (error) {
         console.error("Failed to fetch exam categories:", error);
-        // setExams(Mockexams);
         setExams([]);
       } finally {
-        // Ensure loading is set to false even if the request fails
         setLoading(false);
       }
     };
@@ -57,6 +58,11 @@ const ExamPrepPage = () => {
     }, 1000);
   }, []);
 
+  // If NOT logged in, show DemoPage directly
+  if (!isLoggedIn) {
+    return <DemoPage />;
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[#2D9596] to-[#88C399] flex items-center justify-center">
@@ -65,6 +71,7 @@ const ExamPrepPage = () => {
     );
   }
 
+  // Only logged in users see the original page
   return (
     <div className="min-h-screen relative overflow-hidden pt-20">
       {/* Background Video */}
@@ -137,26 +144,30 @@ const ExamPrepPage = () => {
         </div>
 
         {hasSubscription ? (
-          <div className=" p-8 shadow-xl text-center bg-white/20 rounded-xl">
+          <div className="p-8 shadow-xl text-center bg-white/20 rounded-xl">
             <h2 className="text-2xl font-semibold mb-6 text-gray-800">
               Welcome Back!
             </h2>
-            <Link href="/examprep/dashboard">
-              <Button
-                size="lg"
-                className="bg-[#2D9596] hover:bg-[#88C399] transition-colors duration-300"
-              >
-                Go to Dashboard
-              </Button>
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/examprep/dashboard">
+                <Button
+                  size="lg"
+                  className="bg-[#2D9596] hover:bg-[#88C399] transition-colors duration-300"
+                >
+                  Go to Dashboard
+                </Button>
+              </Link>
+            </div>
           </div>
         ) : (
-          <div className=" p-8 shadow-xl bg-white/20  rounded-2xl">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-800">
-              Available Exam Preparations
-            </h2>
+          <div className="p-8 shadow-xl bg-white/20 rounded-2xl">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+              <h2 className="text-2xl font-semibold mb-0 text-gray-800">
+                Available Exam Preparations
+              </h2>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {exams && exams.length > 0 ? (
                 exams.map((exam) => (
                   <Card

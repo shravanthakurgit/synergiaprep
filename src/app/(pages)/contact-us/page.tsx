@@ -79,7 +79,7 @@ const ContactPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0f3bfe] via-blue-400 dark:via-blue-900 to-blue-200 pt-10">
+    <div className="min-h-screen bg-gradient-to-b from-[#0f3bfe] via-blue-400 dark:via-blue-900 to-blue-200 sm:pt-10">
       {/* Hero Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -87,16 +87,12 @@ const ContactPage = () => {
         transition={{ duration: 0.5 }}
         className="h-64 flex flex-col justify-center items-center text-white"
       >
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">
-          Contact Us
-        </h1>
-        <p className="text-lg md:text-xl">
-          We&apos;d love to hear from you!
-        </p>
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">Contact Us</h1>
+        <p className="text-lg md:text-xl">We&apos;d love to hear from you!</p>
       </motion.div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-12">
+      <div className="max-w-7xl mx-auto mt-[-5rem]  pt:5 sm:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Contact Details */}
           <motion.div
@@ -164,8 +160,8 @@ const ContactPage = () => {
                   Let&apos;s Build Something Amazing Together
                 </h2>
                 <p className="text-gray-600 mb-6">
-                  Share your vision with us, and we&apos;ll help bring it to life
-                  with our expertise and innovative solutions.
+                  Share your vision with us, and we&apos;ll help bring it to
+                  life with our expertise and innovative solutions.
                 </p>
 
                 {formStatus.show && (
@@ -176,9 +172,7 @@ const ContactPage = () => {
                         : "bg-red-100 border-red-500"
                     }`}
                   >
-                    <AlertDescription>
-                      {formStatus.message}
-                    </AlertDescription>
+                    <AlertDescription>{formStatus.message}</AlertDescription>
                   </Alert>
                 )}
 

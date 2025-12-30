@@ -5,7 +5,7 @@ import * as React from "react";
 export function About() {
   return (
     <>
-      <div className="px-6 pb-12 pt-32 bg-white">
+      <div className="px-6 pt-28 pb-15 bg-white sm:pt-10">
         <div className="text-center mb-8">
           <div className="inline-block bg-blue-200 text-blue-700 font-bold px-6 py-2 rounded-full text-lg shadow">
             About Us
@@ -19,10 +19,10 @@ export function About() {
           international universities.
           <br />
           <br />
-          Our platform brings together the best of both worlds: expert-led online
-          exam preparation for entrance and government exams like JEE, NEET,
-          WBJEE, and more, along with personalized study abroad consultancy that
-          opens doors to world-class institutions.
+          Our platform brings together the best of both worlds: expert-led
+          online exam preparation for entrance and government exams like JEE,
+          NEET, WBJEE, and more, along with personalized study abroad
+          consultancy that opens doors to world-class institutions.
           <br />
           <br />
           With a team of experienced mentors, dynamic learning resources, and
