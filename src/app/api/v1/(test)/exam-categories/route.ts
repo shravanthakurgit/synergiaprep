@@ -36,8 +36,8 @@ export const GET = async (req: NextRequest) => {
 
 export const POST = async (req: NextRequest) => {
 
-    const authResponse = await checkAuthAdmin();
-    if(authResponse) return authResponse;
+    // const authResponse = await checkAuthAdmin();
+    // if(authResponse) return authResponse;
 
     try {
 

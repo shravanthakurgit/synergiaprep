@@ -9,7 +9,7 @@ import { checkAuthAdmin, checkAuthUser } from "@/lib/utils/auth-check-in-exam-ap
 export const GET = async (req: NextRequest) => {
 
     const authResponse = await checkAuthUser();
-    if(authResponse) return authResponse;
+    if (authResponse) return authResponse;
 
     try {
 
@@ -57,8 +57,8 @@ export const GET = async (req: NextRequest) => {
 
 export const POST = async (req: NextRequest) => {
 
-    const authResponse = await checkAuthAdmin();
-    if(authResponse) return authResponse;    
+    const authResponse = await checkAuthUser();
+    if (authResponse) return authResponse;    
 
     try {
 

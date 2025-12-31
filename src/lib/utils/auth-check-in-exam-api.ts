@@ -13,7 +13,9 @@ export async function checkAuthUser(){
 }
 
 export async function checkAuthAdmin(){
-    const session = await auth();
+    const session = 
+    
+    await auth();
         // Check authentication
     if (!session) {
         return errorResponse("Not authenticated",401);

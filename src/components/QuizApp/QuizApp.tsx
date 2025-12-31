@@ -352,17 +352,18 @@ const QuizApp = () => {
       console.log("User Response: ", updatedResponse);
 
       try {
-        const response = await fetch(`/api/v1/user-submissions`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedResponse),
-        });
+       const response = await fetch(`/api/v1/user-submissions`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(updatedResponse),
+});
+
 
         const result = await response.json();
-        // console.log(result);
+        console.log(result);
 
         const report = (await submitAttempt(
-          result.data.userId,
+          // result.data.userId,
           result.data.examId,
           result.data.id,
           ExamData.totalDurationInSeconds - timeLeft
