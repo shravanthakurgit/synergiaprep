@@ -4,7 +4,8 @@ import * as React from "react";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, LogOut } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -30,6 +31,7 @@ export function Navbar() {
   // Mobile menu should be closed by default
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
+  const { data: session } = useSession();
 
   const handleLinkClick = () => {
     setIsOpen(false);
@@ -181,13 +183,15 @@ export function Navbar() {
             Archive
           </Link>
 
-          {/* Join Now Button */}
-          <Link
-            href="/login"
-            className="w-32 bg-white font-semibold text-blue-800 h-12 px-2 py-1 rounded-xl hover:bg-gray-300 hover:text-black transition duration-500 flex items-center justify-center"
-          >
-            Join Now
-          </Link>
+          {/* Join Now / Logout Button */}
+          {!session &&(
+            <Link
+              href="/login"
+              className="sm:w-32 bg-white font-semibold text-blue-800 sm:h-12 px-2 py-1 rounded-md hover:bg-gray-300 hover:text-black transition duration-500 flex items-center justify-center"
+            >
+              Join Now
+            </Link>
+          )}
         </div>
 
         {/* Mobile Toggle */}
@@ -307,13 +311,25 @@ export function Navbar() {
             >
               Archive
             </Link>
-            <Link
-              href="/login"
-              className="block w-full border border-indigo-600 text-indigo-600 px-4 py-2 rounded hover:bg-indigo-50 transition text-center font-semibold"
-              onClick={handleLinkClick}
-            >
-              Join Now
-            </Link>
+            {session ? (
+              <button
+                onClick={() => {
+                  handleLinkClick();
+                  signOut({ callbackUrl: "/examprep" });
+                }}
+                className="block w-full border border-indigo-600 text-indigo-600 px-4 py-2 rounded hover:bg-indigo-50 transition text-center font-semibold"
+              >
+                <LogOut className="inline mr-2" /> Log out
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className="block w-full border border-indigo-600 text-indigo-600 px-4 py-2 rounded hover:bg-indigo-50 transition text-center font-semibold"
+                onClick={handleLinkClick}
+              >
+                Join Now
+              </Link>
+            )}
           </div>
         </div>
       )}

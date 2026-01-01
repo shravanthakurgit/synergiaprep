@@ -1,23 +1,22 @@
 "use server";
-import { signIn } from "@/auth"; 
-
+import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
 
-export const login = async (values: {email:string, password:string, redirectNext:string}) => {
+export const login = async (values: { email: string; password: string; redirectNext?: string }) => {
   const { email, password, redirectNext } = values;
-  if(!email || !password) {
+  if (!email || !password) {
     return { error: "Invalid credentials" };
   }
 
-
   try {
     await signIn("credentials", {
-      email, password,
+      email,
+      password,
       redirectTo: redirectNext || "/examprep",
-    })
-    
-  }
-  catch (error) {
+    });
+
+    return { success: true };
+  } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
         case "CredentialsSignin":
@@ -28,4 +27,4 @@ export const login = async (values: {email:string, password:string, redirectNext
     }
     throw error;
   }
-}
+};

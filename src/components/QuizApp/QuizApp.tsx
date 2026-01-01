@@ -210,14 +210,14 @@ const QuizApp = () => {
       const updatedAnswers = prev.userAnswerPerQuestions.map((answer) =>
         answer.questionId === questionId
           ? {
-              ...answer,
-              isAttempted: true,
-              value: currentanswer?.value?.toString() || "",
-              chosenOptions:
-                currentanswer?.chosenOptions?.map((option) => ({
-                  optionId: option.optionId,
-                })) || [],
-            }
+            ...answer,
+            isAttempted: true,
+            value: currentanswer?.value?.toString() || "",
+            chosenOptions:
+              currentanswer?.chosenOptions?.map((option) => ({
+                optionId: option.optionId,
+              })) || [],
+          }
           : answer
       );
       return {
@@ -232,7 +232,7 @@ const QuizApp = () => {
     if (
       ExamData &&
       currentQuestion[1] + 1 <
-        ExamData.examSections[currentQuestion[0]].questions.length
+      ExamData.examSections[currentQuestion[0]].questions.length
     ) {
       const nextQuestion = currentQuestion[1] + 1;
       setCurrentQuestion([currentQuestion[0], nextQuestion]);
@@ -255,8 +255,8 @@ const QuizApp = () => {
       ...prev,
       userAnswerPerQuestions: prev.userAnswerPerQuestions.map((answer) =>
         answer.questionId ===
-        ExamData.examSections[currentQuestion[0]].questions[currentQuestion[1]]
-          .id
+          ExamData.examSections[currentQuestion[0]].questions[currentQuestion[1]]
+            .id
           ? { ...answer, value: "", chosenOptions: [] }
           : answer
       ),
@@ -287,7 +287,7 @@ const QuizApp = () => {
     if (
       ExamData &&
       currentQuestion[1] + 1 <
-        ExamData.examSections[currentQuestion[0]].questions.length
+      ExamData.examSections[currentQuestion[0]].questions.length
     ) {
       const nextQuestion = currentQuestion[1] + 1;
       setCurrentQuestion([currentQuestion[0], nextQuestion]);
@@ -307,20 +307,17 @@ const QuizApp = () => {
   const handleNextQuestion = () => {
     setCurrentanswer(null);
     if (
-      ExamData &&
+      ExamData?.examSections?.[currentQuestion[0]] &&
       currentQuestion[1] + 1 <
-        ExamData.examSections[currentQuestion[0]].questions.length
+      ExamData.examSections[currentQuestion[0]].questions.length
     ) {
       const nextQuestion = currentQuestion[1] + 1;
       setCurrentQuestion([currentQuestion[0], nextQuestion]);
       setVisitedQuestions(
         new Set([...visitedQuestions, `${currentQuestion[0]}-${nextQuestion}`])
       );
-    } else {
-      const nextSection =
-        ExamData && ExamData.examSections[currentQuestion[0]]
-          ? (currentQuestion[0] + 1) % ExamData.examSections.length
-          : 0;
+    } else if (ExamData?.examSections?.length) {
+      const nextSection = (currentQuestion[0] + 1) % ExamData.examSections.length;
       setCurrentQuestion([nextSection, 0]);
       setVisitedQuestions(new Set([...visitedQuestions, `${nextSection}-0`]));
     }
@@ -330,12 +327,10 @@ const QuizApp = () => {
     setCurrentanswer(null);
     if (currentQuestion[1] > 0) {
       setCurrentQuestion([currentQuestion[0], currentQuestion[1] - 1]);
-    } else {
+    } else if (ExamData?.examSections?.length) {
       const prevSection =
-        ExamData && ExamData.examSections[currentQuestion[0]]
-          ? (currentQuestion[0] - 1 + ExamData.examSections.length) %
-            ExamData.examSections.length
-          : 0;
+        (currentQuestion[0] - 1 + ExamData.examSections.length) %
+        ExamData.examSections.length;
       const prevQuestion =
         ExamData.examSections[prevSection].questions.length - 1;
       setCurrentQuestion([prevSection, prevQuestion]);
@@ -352,20 +347,30 @@ const QuizApp = () => {
       console.log("User Response: ", updatedResponse);
 
       try {
-       const response = await fetch(`/api/v1/user-submissions`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(updatedResponse),
-});
+        const response = await fetch(`/api/v1/user-submissions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedResponse),
+        });
 
 
         const result = await response.json();
         console.log(result);
 
+        //destructuring data from result object
+        const {
+          userId,
+          examId,
+          id: userSubmissionId,
+        } = result.data;
+
+
+
         const report = (await submitAttempt(
           // result.data.userId,
-          result.data.examId,
-          result.data.id,
+          userId,
+          examId,
+          userSubmissionId,
           ExamData.totalDurationInSeconds - timeLeft
         )) as {
           data: {

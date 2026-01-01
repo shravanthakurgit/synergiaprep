@@ -188,10 +188,17 @@ const AuthForm = () => {
         error?: string;
       }
       login({ email, password, redirectNext })
-        .then((data: LoginResponse | undefined) => {
-          if (data?.error) setError(data.error);
+        .then(async (data: LoginResponse | undefined) => {
+          if (data?.error) {
+            setError(data.error);
+          } else {
+
+            await router.refresh();
+            router.push(redirectNext);
+          }
         })
         .finally(() => {
+          
           setLoading(false);
         });
     });

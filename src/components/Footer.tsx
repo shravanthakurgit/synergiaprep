@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Linkedin, Twitter, Facebook, Mail, Phone, MapPin, Youtube, Instagram } from "lucide-react";
 import { Section } from "./craft";
+import { useSession } from "next-auth/react";
 import {
   Tooltip,
   TooltipContent,
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/tooltip";
 
 export default function Footer() {
+  const { data: session } = useSession();
   const socialLinks = [
     { icon: Linkedin, href: "https://www.linkedin.com/company/105668233/admin/feed/following/", label: "Linkedin" },
     { icon: Twitter, href: "https://x.com/synergiaprep", label: "Twitter" },
@@ -130,12 +132,18 @@ export default function Footer() {
                     >
                       Contact Us
                     </Link>
-                    <Link
-                      href="/admin"
-                      className="text-muted-foreground hover:text-primary transition-colors duration-200"
-                    >
-                      Admin
-                    </Link>
+                    {session &&
+                    (session.user?.role || "")
+                      .toString()
+                      .toUpperCase()
+                      .match(/ADMIN|SUPERADMIN/) ? (
+                      <Link
+                        href="/admin"
+                        className="text-muted-foreground hover:text-primary transition-colors duration-200"
+                      >
+                        Admin
+                      </Link>
+                    ) : null}
                   </div>
                 </div>
               </div>

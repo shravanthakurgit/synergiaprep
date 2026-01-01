@@ -5,7 +5,7 @@ const baseUrl = "";
 
 export async function submitAttempt(userId : string,examId : string,userSubmissionId : string,timeTaken : number): Promise<unknown> {
     try {
-        
+        console.log("user submission id : ",userSubmissionId)
         const responseUs = await fetch(`${baseUrl}/api/v1/user-submissions/${userSubmissionId}`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },

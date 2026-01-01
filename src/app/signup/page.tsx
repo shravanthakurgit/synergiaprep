@@ -59,8 +59,12 @@ const SignupForm = () => {
             error?: string;
           }
           login({ email, password, redirectNext })
-            .then((data: LoginResponse | undefined) => {
+            .then(async (data: LoginResponse | undefined) => {
               if (data?.error) setError(data.error);
+              else {
+                await router.refresh();
+                router.push(redirectNext as string);
+              }
             })
             .finally(() => {
               console.log("Login after signup");

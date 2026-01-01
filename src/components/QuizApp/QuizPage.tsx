@@ -125,9 +125,13 @@ const QuizPage: React.FC<QuizPageProps> = ({
   getQuestionStatus,
   updateCurrentAnswer,
 }) => {
-  const currentQuestionData =
-    Exam?.examSections[currentQuestion[0]].questions[currentQuestion[1]];
-  const currentSectionData = Exam?.examSections[currentQuestion[0]];
+  const currentSectionData = Exam?.examSections?.[currentQuestion[0]];
+  const currentQuestionData = currentSectionData?.questions?.[currentQuestion[1]];
+
+  // Return early if exam data is not ready
+  if (!Exam?.examSections?.length || !currentSectionData || !currentQuestionData) {
+    return <div className="bg-white min-h-screen flex items-center justify-center">Loading question...</div>;
+  }
 
   const isNumerical = currentQuestionData.options.length === 0;
   const isMultipleChoice =

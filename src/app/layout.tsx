@@ -4,6 +4,7 @@ import "./globals.css";
 import "@/components/craft/craft.css";
 
 import { ThemeProvider } from "@/components/theme-provider";
+import { SessionProvider } from "next-auth/react";
 import BodyWrapper from "@/components/BodyWrapper"; // Import BodyWrapper
 import Script from "next/script";
 import Head from "next/head"; // ✅ import Head
@@ -66,7 +67,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <BodyWrapper>{children}</BodyWrapper>
+            <BodyWrapper>
+              <SessionProvider>{children}</SessionProvider>
+            </BodyWrapper>
           </ThemeProvider>
         </body>
       </html>
