@@ -40,6 +40,7 @@ import {
 import Loading from "@/components/Loading";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import DeleteExamButton from "@/components/DeleteExamButton";
 
 interface practiceTest {
   id: string;
@@ -61,6 +62,10 @@ const Page: React.FC = () => {
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+  
+
+
 
   useEffect(() => {
     const fetchpracticeTests = async () => {
@@ -138,6 +143,9 @@ const Page: React.FC = () => {
     }
     return `${minutes} mins`;
   };
+
+
+
 
   if (loading) {
     return (
@@ -284,13 +292,21 @@ const Page: React.FC = () => {
             )}
           </CardContent>
 
-          <CardFooter className="pt-2">
+          <CardFooter className="pt-2 flex flex-col gap-2">
             <Button
               onClick={() => handleStartTest(test.id)}
               className={`w-full ${isLoggedIn ? "bg-blue-600 hover:bg-blue-700" : "bg-amber-500 hover:bg-amber-600"}`}
             >
               {isLoggedIn ? "Start Test" : "Login to Start"}
             </Button>
+<DeleteExamButton
+  examId={test.id}
+  onDeleted={() => {
+    setpracticeTests((prev) =>
+      prev.filter((exam) => exam.id !== test.id)
+    );
+  }}
+/>
           </CardFooter>
         </Card>
       </div>

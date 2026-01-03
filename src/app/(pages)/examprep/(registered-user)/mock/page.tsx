@@ -40,6 +40,7 @@ import {
 import Loading from "@/components/Loading";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import DeleteExamButton from "@/components/DeleteExamButton";
 
 interface pyqTest {
   id: string;
@@ -61,6 +62,8 @@ const Page: React.FC = () => {
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+
 
   const isLoggedIn = status === "authenticated";
 
@@ -285,13 +288,21 @@ const Page: React.FC = () => {
             )}
           </CardContent>
 
-          <CardFooter className="pt-2">
+          <CardFooter className="pt-2 flex flex-col gap-2">
             <Button
               onClick={() => handleStartTest(test.id)}
               className={`w-full ${isLoggedIn ? "bg-emerald-600 hover:bg-emerald-700" : "bg-amber-500 hover:bg-amber-600"}`}
             >
               {isLoggedIn ? "Start PYQ Test" : "Login to Start"}
             </Button>
+            <DeleteExamButton
+  examId={test.id}
+  onDeleted={() => {
+    setpyqTests((prev) =>
+      prev.filter((exam) => exam.id !== test.id)
+    );
+  }}
+/>
           </CardFooter>
         </Card>
       </div>

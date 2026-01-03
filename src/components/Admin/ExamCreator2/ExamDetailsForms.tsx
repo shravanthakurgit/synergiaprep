@@ -52,6 +52,8 @@ export function ExamDetailsForm({
     { examPattern: string; description: string; id: string; name: string }[]
   >([]);
 
+  const [isSubmit, setIsSubmit] = useState(false);
+
   // Watch examTypeId so we can conditionally render the Year input field
   const examTypeId = form.watch("examTypeId");
   const currentExamType = examTypes.find(
@@ -59,6 +61,7 @@ export function ExamDetailsForm({
   );
 
   function onSubmit(data: ExamDetailsFormValues) {
+    setIsSubmit(true);
     const selectedExamType = examTypes.find(
       (type) => type.id === Number(data.examTypeId)
     );
@@ -116,12 +119,15 @@ export function ExamDetailsForm({
                 },
               ]
         );
+      
       } catch (error) {
         console.error("Error fetching exam details:", error);
         alert(
           "There was an issue fetching the exam details. Please try again."
         );
       }
+
+      setIsSubmit(false)
     }
     fetchData();
   }, []);
@@ -155,11 +161,12 @@ export function ExamDetailsForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-6">
         <FormField
+        rules={{ required: "Title is required" }}
           control={form.control}
-          name="title"
+          name="title" 
           render={({ field }) => (
             <FormItem className="flex-1">
-              <FormLabel>Title</FormLabel>
+              <FormLabel>Title *</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Title"
@@ -178,11 +185,12 @@ export function ExamDetailsForm({
         />
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
           <FormField
+          rules={{ required: "Category is required" }}
             control={form.control}
             name="examCategoryId"
             render={({ field }) => (
               <FormItem className="flex-1">
-                <FormLabel>Category</FormLabel>
+                <FormLabel>Category *</FormLabel>
                 <Select
                   onValueChange={(value) => {
                     field.onChange(value);
@@ -209,10 +217,11 @@ export function ExamDetailsForm({
           />
           <FormField
             control={form.control}
+            rules={{ required: "Exam Type is required" }}
             name="examTypeId"
             render={({ field }) => (
               <FormItem className="flex-1">
-                <FormLabel>Exam Type</FormLabel>
+                <FormLabel>Exam Type *</FormLabel>
                 <Select
                   onValueChange={(value) => {
                     field.onChange(value);
@@ -222,7 +231,7 @@ export function ExamDetailsForm({
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select Exam Type" />
+                      <SelectValue  placeholder="Select Exam Type " />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -244,13 +253,14 @@ export function ExamDetailsForm({
         {/* Conditionally render the Year input if the selected exam type is PYQ */}
         {currentExamType?.name === "PYQ" && (
           <FormField
+
             control={form.control}
             name="year"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Year</FormLabel>
                 <FormControl>
-                  <Input type="text" placeholder="Enter Year" {...field} />
+                  <Input type="text"  placeholder="Enter Year" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -259,11 +269,15 @@ export function ExamDetailsForm({
         )}
         <FormField
           control={form.control}
+           rules={{
+    required: "Exam duration is required",
+    min: { value: 1, message: "Duration must be at least 1 second" },
+  }}
           name="totalDurationInSeconds"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Exam Duration</FormLabel>
-              <FormControl>
+              <FormLabel>Exam Duration *</FormLabel>
+              <FormControl >
                 <Input
                   type="number"
                   placeholder="Exam Duration (in seconds)"
@@ -278,7 +292,7 @@ export function ExamDetailsForm({
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        <Button type="submit">{isSubmit ? "Submitting..." : "Submit"}</Button>
       </form>
     </Form>
   );

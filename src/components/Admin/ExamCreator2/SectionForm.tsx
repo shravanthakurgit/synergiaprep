@@ -218,7 +218,7 @@ export function SectionDetailsForm({
                 onClick={handleAddSection}
               // disabled={mode === "edit"}
               >
-                Add Section
+                Add Section ..
               </Button>
               <Button
                 type="button"

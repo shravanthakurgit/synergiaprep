@@ -1,39 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
-
-const prisma = new PrismaClient();
-
-async function main() {
-  const adminEmail = process.env.ADMIN_EMAIL || "admin@example.com";
-  const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
-  const adminName = process.env.ADMIN_NAME || "Admin";
-  const adminPhone = process.env.ADMIN_PHONE || "9999999999";
-
-  const hashedPassword = await bcrypt.hash(adminPassword, 10);
-
-  const admin = await prisma.user.upsert({
-    where: { email: adminEmail },
-    update: {},
-    create: {
-      email: adminEmail,
-      name: adminName,
-      ph_no: adminPhone,
-      password: hashedPassword,
-      role: "ADMIN",
-    },
-  });
-
-  console.log("Admin user created:", admin);
-}
-
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });generator client {
+generator client {
   provider = "prisma-client-js"
 }
 
@@ -518,4 +483,22 @@ enum CourseLevel {
   BASIC
   STANDARD
   PREMIUM
+}
+
+
+model ArchivePDF {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  subjects    String[] // array of subjects as strings
+  exam        String?
+  year        Int?
+  fileSize    String?
+  pages       Int?
+  fileType    String   @default("PDF")
+  downloadUrl String
+  category    String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

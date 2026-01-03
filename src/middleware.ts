@@ -1,8 +1,13 @@
 // middleware.ts
 import { NextRequest, NextResponse } from "next/server";
 import { privateRoutes, authRoutes, adminRoutes } from "./route";
+import { getToken } from "next-auth/jwt";
 
-export const middleware = (req: NextRequest) => {
+
+const ADMIN_ROLES = ["admin", "superadmin"];
+
+
+export const middleware = async (req: NextRequest) => {
   const res = NextResponse.next();
   const { nextUrl } = req;
   const pathname = nextUrl.pathname;
@@ -42,12 +47,30 @@ export const middleware = (req: NextRequest) => {
 
   // Admin route handling
   if (isAdminRoutes) {
-    if (!isLoggedIn) {
+
+    const token = await getToken({
+    req,
+    secret: process.env.AUTH_SECRET || process.env.JWT_SECRET,
+  });
+
+  // Not logged in
+  if (!token) {
+    const loginUrl = new URL("/login", req.url);
+    loginUrl.searchParams.set("next", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  const role = typeof token.role === "string"
+    ? token.role.toLowerCase()
+    : undefined;
+
+
+  // Logged in but not admin
+  if (!role || !ADMIN_ROLES.includes(role)) {
       const redirectUrl = new URL("/login", nextUrl);
-      redirectUrl.searchParams.set("next", pathname);
       return NextResponse.redirect(redirectUrl);
-    }
-    return res;
+  }
+  return res;
   }
 
   // Auth route handling

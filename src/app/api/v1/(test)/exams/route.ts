@@ -31,8 +31,8 @@ interface ExamQuery {
 }
 
 export const GET = async (req: NextRequest) => {
-  const authResponse = await checkAuthUser();
-  if (authResponse) return authResponse;
+  // const authResponse = await checkAuthUser();
+  // if (authResponse) return authResponse;
 
   try {
     const searchParams = req.nextUrl.searchParams;

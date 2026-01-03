@@ -132,18 +132,14 @@ export default function Footer() {
                     >
                       Contact Us
                     </Link>
-                    {session &&
-                    (session.user?.role || "")
-                      .toString()
-                      .toUpperCase()
-                      .match(/ADMIN|SUPERADMIN/) ? (
+                    
                       <Link
                         href="/admin"
                         className="text-muted-foreground hover:text-primary transition-colors duration-200"
                       >
                         Admin
                       </Link>
-                    ) : null}
+                    
                   </div>
                 </div>
               </div>

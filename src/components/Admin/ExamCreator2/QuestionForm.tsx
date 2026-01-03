@@ -32,6 +32,7 @@ import { ChangeEvent } from "react";
 import Image from "next/image";
 import { uploadImgDB } from "@/app/actions/img";
 import { LatexEditor } from "./PopupLatexInput";
+import { set } from "date-fns";
 
 const getQuestionType = (sectionName: string): QuestionType => {
   const name = sectionName.toUpperCase();
@@ -184,6 +185,8 @@ export function QuestionForm({
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [currentField, setCurrentField] = useState<string | null>(null);
   const [editorInitialValue, setEditorInitialValue] = useState("");
+const [isSubmit, setIsSubmit] = useState(false);
+
   const openLatexEditor = (fieldName: string) => {
     setCurrentField((prev) => fieldName);
     const currentValue = form.getValues(fieldName as "text");
@@ -265,25 +268,32 @@ export function QuestionForm({
     form.setValue(fieldPath as keyof QuestionFormState, null);
   };
 
-  const onSubmit = async (formData: QuestionFormState) => {
-    try {
-      console.log("formdata: ", formData);
+const onSubmit = async (formData: QuestionFormState) => {
+  setIsSubmit(true);
 
-      // Update questions state
-      if (editingIndex !== null) {
-        setQuestions((prevQuestions) =>
-          prevQuestions.map((q, i) => (i === editingIndex ? formData : q))
-        );
-        setEditingIndex(null);
-      } else {
-        setQuestions((prevQuestions) => [...prevQuestions, formData]);
-      }
-      form.reset(getDefaultValues());
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      // Handle error (maybe show a toast notification)
+  const timeoutId = setTimeout(() => {
+    try {
+    if (editingIndex !== null) {
+      setQuestions((prev) =>
+        prev.map((q, i) => (i === editingIndex ? formData : q))
+      );
+      setEditingIndex(null);
+    } else {
+      setQuestions((prev) => [...prev, formData]);
     }
-  };
+
+    // optional reset
+    // form.reset(getDefaultValues());
+  } catch (error) {
+    console.error("Error submitting form:", error);
+  } finally {
+    setIsSubmit(false);
+  }
+  }, 1000);
+
+  
+};
+
 
   useEffect(() => {
     async function fetchData() {
@@ -703,8 +713,12 @@ export function QuestionForm({
                 </div>
 
                 <div className="flex gap-2 mt-4">
-                  <Button type="submit" className="flex-1">
-                    {editingIndex !== null ? "Update" : "Submit"} Question
+                  <Button type="submit" className="flex-1" disabled={isSubmit}>
+                    {editingIndex !== null
+    ? "Update"
+    : isSubmit
+    ? "Adding..."
+    : "Add"}{" "} Question
                   </Button>
                   {editingIndex !== null && (
                     <Button

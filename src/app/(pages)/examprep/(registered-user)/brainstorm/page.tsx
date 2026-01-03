@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/popover";
 import Loading from "@/components/Loading";
 import Link from "next/link";
+import DeleteExamButton from "@/components/DeleteExamButton";
 
 interface brainstormTest {
   id: string;
@@ -258,10 +259,18 @@ const Page: React.FC = () => {
               </div>
             </div>
           </CardContent>
-          <CardFooter className="pt-2">
+          <CardFooter className="pt-2 flex flex-col gap-2 mt-4">
             <Link href={`/exam?examId=${test.id}`} className="w-full">
-              <Button className="w-full">Start Test</Button>
+              <Button className="w-full bg-blue-600 hover:bg-blue-700">Start Test</Button>
             </Link>
+            <DeleteExamButton
+              examId={test.id}
+              onDeleted={() => {
+                setbrainstormTests((prev) =>
+                  prev.filter((exam) => exam.id !== test.id)
+                );
+              }}
+              />
           </CardFooter>
         </Card>
       </div>
