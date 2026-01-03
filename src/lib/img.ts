@@ -4,51 +4,58 @@ import { db } from "./db";
 import { auth } from "@/auth";
 import { dbUpdateImgUsingId } from "@/app/actions/data";
 
+export async function uploadImg(
+  signedUrl: string,
+  fileData: ArrayBuffer,
+  file: File
+) {
+  const session = await auth();
+  if (!session?.user) return false;
 
-export async function uploadImg(signedUrl: string, fileData: ArrayBuffer, file: File) {
-    const session = await auth();
-    if (!session?.user) return false;
+  // Upload ORIGINAL file (no sharp, no resize, no compression)
+  const uploadRes = await fetch(signedUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": file.type, // IMPORTANT
+    },
+    body: fileData, // ORIGINAL BYTES
+  });
 
-    const resizedImage = await sharp(fileData).jpeg({ quality: 80 }).resize(300, 300).toBuffer();
-    console.log('signed url : ',signedUrl);
+  if (!uploadRes.ok) {
+    console.error("Upload failed");
+    return false;
+  }
 
-    fetch(signedUrl.toString())
-    .then((res) => res.json())
-    .then((res) => {
-      const body = new Blob([resizedImage], { type: file.type });
-      console.log('url : ',res.signedUrl.split('?')[0]);
+  // Remove query params → actual file URL
+  const fileUrl = signedUrl.split("?")[0];
 
-      fetch(res.signedUrl, {
-        body,
-        method: "PUT",
-      }).then(async () =>{
-        console.log("File uploaded");
-        // this needs to be updated for questions and other models
-        dbUpdateImgUsingId(session?.user?.id, {
-          image:res.signedUrl.split('?')[0] as string
-        });
-        console.log("Image URL updated");
-      });
-    });
-    return true;
+  // Update DB
+  await dbUpdateImgUsingId(session.user.id, {
+    image: fileUrl,
+  });
+
+  console.log("Image uploaded in original quality");
+  return true;
 }
+
 
 export async function deleteImg(signedUrl: string) {
   const session = await auth();
   if (!session?.user) return false;
-  console.log(signedUrl);
-  fetch(signedUrl.toString())
-  .then((res) => res.json())
-  .then((res) => {
-    fetch(res.signedUrl, {
-      method: "DELETE",
-    }).then(async () => {
-      console.log("File Deleted");
-      dbUpdateImgUsingId(session?.user?.id, {
-        image:null,
-      });
-      console.log("Image deleted");
-    });
+
+  const res = await fetch(signedUrl, {
+    method: "DELETE",
   });
+
+  if (!res.ok) {
+    console.error("Delete failed");
+    return false;
+  }
+
+  await dbUpdateImgUsingId(session.user.id, {
+    image: null,
+  });
+
+  console.log("Image deleted");
   return true;
 }

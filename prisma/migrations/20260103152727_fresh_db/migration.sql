@@ -1,26 +1,40 @@
 -- CreateEnum
-CREATE TYPE "RoleType" AS ENUM ('ADMIN', 'USER');
+CREATE TYPE "RoleType" AS ENUM ('USER', 'ADMIN', 'SUPERADMIN');
 
 -- CreateEnum
-CREATE TYPE "ExamType" AS ENUM ('PYQ', 'MOCK', 'PRACTICE', 'QUIZ', 'BRAINSTROM');
+CREATE TYPE "ExamType" AS ENUM ('PYQ', 'MOCK', 'PRACTICE', 'QUIZ', 'BRAINSTORM');
 
 -- CreateEnum
 CREATE TYPE "DifficultyLevel" AS ENUM ('EASY', 'MEDIUM', 'HARD');
+
+-- CreateEnum
+CREATE TYPE "CourseLevel" AS ENUM ('BASIC', 'STANDARD', 'PREMIUM');
 
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "ph_no" TEXT NOT NULL,
     "name" TEXT,
-    "email" TEXT,
+    "email" TEXT NOT NULL,
     "emailVerified" TIMESTAMP(3),
     "image" TEXT,
     "password" TEXT,
-    "role" "RoleType" NOT NULL,
+    "role" "RoleType" NOT NULL DEFAULT 'USER',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Subscription" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "startedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "endsAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Subscription_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -40,6 +54,17 @@ CREATE TABLE "Account" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Account_pkey" PRIMARY KEY ("provider","providerAccountId")
+);
+
+-- CreateTable
+CREATE TABLE "Order" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "totalAmount" DOUBLE PRECISION NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Order_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -63,7 +88,7 @@ CREATE TABLE "VerificationToken" (
 -- CreateTable
 CREATE TABLE "OTP" (
     "id" TEXT NOT NULL,
-    "ph_no" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
     "otp" TEXT NOT NULL,
     "expires" TIMESTAMP(3) NOT NULL,
 
@@ -133,7 +158,8 @@ CREATE TABLE "Exam" (
     "total_duration_in_seconds" INTEGER,
     "total_questions" INTEGER NOT NULL DEFAULT 0,
     "total_marks" DOUBLE PRECISION NOT NULL DEFAULT 0,
-    "examType" "ExamType" NOT NULL,
+    "isDraft" BOOLEAN NOT NULL DEFAULT false,
+    "exam_type" "ExamType" NOT NULL,
     "exam_category_id" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -170,6 +196,7 @@ CREATE TABLE "Question" (
     "text" TEXT,
     "image_url" TEXT,
     "difficulty_level" "DifficultyLevel" NOT NULL,
+    "exam_type" "ExamType" NOT NULL,
     "exam_section_id" TEXT,
     "chapter_id" TEXT NOT NULL,
 
@@ -193,6 +220,7 @@ CREATE TABLE "AnswerExplanationField" (
     "text" TEXT,
     "value" TEXT,
     "explanation" TEXT,
+    "imageUrl" TEXT,
     "question_id" TEXT NOT NULL,
 
     CONSTRAINT "AnswerExplanationField_pkey" PRIMARY KEY ("id")
@@ -229,20 +257,174 @@ CREATE TABLE "UserSubmission" (
     CONSTRAINT "UserSubmission_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "ExamAttempt" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "examId" TEXT NOT NULL,
+    "score" DOUBLE PRECISION NOT NULL,
+    "percentile" DOUBLE PRECISION,
+    "rank" INTEGER,
+    "accuracy" DOUBLE PRECISION NOT NULL,
+    "attemptedQuestions" INTEGER NOT NULL,
+    "correctAnswers" INTEGER NOT NULL,
+    "incorrectAnswers" INTEGER NOT NULL,
+    "timeTaken" INTEGER NOT NULL,
+    "userSubmissionId" TEXT NOT NULL,
+
+    CONSTRAINT "ExamAttempt_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "AnalysisReport" (
+    "id" TEXT NOT NULL,
+    "examAttemptId" TEXT NOT NULL,
+    "overallPerformance" JSONB,
+    "topicWisePerformance" JSONB,
+    "difficultyWisePerformance" JSONB,
+    "timeManagement" JSONB,
+    "strengthsAndWeaknesses" JSONB,
+    "suggestedImprovements" TEXT[],
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "AnalysisReport_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ExamStatistics" (
+    "id" TEXT NOT NULL,
+    "examId" TEXT NOT NULL,
+    "totalAttempts" INTEGER NOT NULL,
+    "averageScore" DOUBLE PRECISION NOT NULL,
+    "highestScore" DOUBLE PRECISION NOT NULL,
+    "lowestScore" DOUBLE PRECISION NOT NULL,
+    "medianScore" DOUBLE PRECISION NOT NULL,
+    "standardDeviation" DOUBLE PRECISION NOT NULL,
+    "averageTimeTaken" INTEGER NOT NULL,
+    "topPerformers" JSONB NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ExamStatistics_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "QuestionStatistics" (
+    "id" SERIAL NOT NULL,
+    "questionId" TEXT NOT NULL,
+    "totalAttempts" INTEGER NOT NULL,
+    "correctAttempts" INTEGER NOT NULL,
+    "incorrectAttempts" INTEGER NOT NULL,
+    "averageTimeTaken" INTEGER NOT NULL,
+    "difficultyIndex" DOUBLE PRECISION NOT NULL,
+
+    CONSTRAINT "QuestionStatistics_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Course" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "subtitle" TEXT NOT NULL,
+    "thumbnailUrl" TEXT NOT NULL,
+    "description" TEXT,
+    "price" DOUBLE PRECISION NOT NULL,
+    "discount" DOUBLE PRECISION NOT NULL,
+    "level" "CourseLevel" NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Course_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "CourseToExamCategory" (
+    "id" TEXT NOT NULL,
+    "courseId" TEXT NOT NULL,
+    "examCategoryId" TEXT NOT NULL,
+
+    CONSTRAINT "CourseToExamCategory_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "CourseExam" (
+    "id" TEXT NOT NULL,
+    "courseId" TEXT NOT NULL,
+    "examId" TEXT NOT NULL,
+
+    CONSTRAINT "CourseExam_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Enrollment" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "courseId" TEXT NOT NULL,
+    "totalAmount" DOUBLE PRECISION NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Enrollment_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ArchivePDF" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "description" TEXT,
+    "subjects" TEXT[],
+    "exam" TEXT,
+    "year" INTEGER,
+    "fileSize" TEXT,
+    "pages" INTEGER,
+    "fileType" TEXT NOT NULL DEFAULT 'PDF',
+    "downloadUrl" TEXT NOT NULL,
+    "category" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ArchivePDF_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_ph_no_key" ON "User"("ph_no");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Session_sessionToken_key" ON "Session"("sessionToken");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "OTP_ph_no_key" ON "OTP"("ph_no");
+CREATE UNIQUE INDEX "OTP_email_key" ON "OTP"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ChapterToExam_chapterId_examId_key" ON "ChapterToExam"("chapterId", "examId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "AnswerExplanationField_question_id_key" ON "AnswerExplanationField"("question_id");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "ExamAttempt_userSubmissionId_key" ON "ExamAttempt"("userSubmissionId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "AnalysisReport_examAttemptId_key" ON "AnalysisReport"("examAttemptId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ExamStatistics_examId_key" ON "ExamStatistics"("examId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "QuestionStatistics_questionId_key" ON "QuestionStatistics"("questionId");
+
+-- AddForeignKey
+ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
 -- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Order" ADD CONSTRAINT "Order_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -275,10 +457,10 @@ ALTER TABLE "ExamSection" ADD CONSTRAINT "ExamSection_section_config_id_fkey" FO
 ALTER TABLE "ExamSection" ADD CONSTRAINT "ExamSection_exam_id_fkey" FOREIGN KEY ("exam_id") REFERENCES "Exam"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ExamSection" ADD CONSTRAINT "ExamSection_subjectId_fkey" FOREIGN KEY ("subjectId") REFERENCES "Subject"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ExamSection" ADD CONSTRAINT "ExamSection_subjectId_fkey" FOREIGN KEY ("subjectId") REFERENCES "Subject"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Question" ADD CONSTRAINT "Question_exam_section_id_fkey" FOREIGN KEY ("exam_section_id") REFERENCES "ExamSection"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Question" ADD CONSTRAINT "Question_exam_section_id_fkey" FOREIGN KEY ("exam_section_id") REFERENCES "ExamSection"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Question" ADD CONSTRAINT "Question_chapter_id_fkey" FOREIGN KEY ("chapter_id") REFERENCES "Chapter"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -306,3 +488,39 @@ ALTER TABLE "UserSubmission" ADD CONSTRAINT "UserSubmission_user_id_fkey" FOREIG
 
 -- AddForeignKey
 ALTER TABLE "UserSubmission" ADD CONSTRAINT "UserSubmission_exam_id_fkey" FOREIGN KEY ("exam_id") REFERENCES "Exam"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ExamAttempt" ADD CONSTRAINT "ExamAttempt_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ExamAttempt" ADD CONSTRAINT "ExamAttempt_examId_fkey" FOREIGN KEY ("examId") REFERENCES "Exam"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ExamAttempt" ADD CONSTRAINT "ExamAttempt_userSubmissionId_fkey" FOREIGN KEY ("userSubmissionId") REFERENCES "UserSubmission"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AnalysisReport" ADD CONSTRAINT "AnalysisReport_examAttemptId_fkey" FOREIGN KEY ("examAttemptId") REFERENCES "ExamAttempt"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ExamStatistics" ADD CONSTRAINT "ExamStatistics_examId_fkey" FOREIGN KEY ("examId") REFERENCES "Exam"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "QuestionStatistics" ADD CONSTRAINT "QuestionStatistics_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CourseToExamCategory" ADD CONSTRAINT "CourseToExamCategory_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "Course"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CourseToExamCategory" ADD CONSTRAINT "CourseToExamCategory_examCategoryId_fkey" FOREIGN KEY ("examCategoryId") REFERENCES "ExamCategory"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CourseExam" ADD CONSTRAINT "CourseExam_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "Course"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CourseExam" ADD CONSTRAINT "CourseExam_examId_fkey" FOREIGN KEY ("examId") REFERENCES "Exam"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Enrollment" ADD CONSTRAINT "Enrollment_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Enrollment" ADD CONSTRAINT "Enrollment_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "Course"("id") ON DELETE CASCADE ON UPDATE CASCADE;

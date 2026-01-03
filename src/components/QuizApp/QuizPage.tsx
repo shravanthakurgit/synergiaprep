@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -17,6 +17,8 @@ import {
   X,
   Flag,
   Save,
+  X as CloseIcon,
+  Maximize2,
 } from "lucide-react";
 import QuestionPanel from "./QuestionPanel";
 import { Exam, OptionSelection } from "@/types/examTypes";
@@ -54,6 +56,49 @@ interface QuizPageProps {
   ) => string;
   updateCurrentAnswer: (value: string) => void;
 }
+
+// Image Modal Component
+const ImageModal: React.FC<{
+  imageUrl: string;
+  alt: string;
+  isOpen: boolean;
+  onClose: () => void;
+}> = ({ imageUrl, alt, isOpen, onClose }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4">
+      <div className="relative w-full max-w-4xl max-h-[90vh]">
+        <Button
+          onClick={onClose}
+          variant="ghost"
+          size="icon"
+          className="absolute -top-12 right-0 text-white hover:bg-white/20 z-10"
+        >
+          <CloseIcon className="h-6 w-6" />
+        </Button>
+        
+        <div className="relative w-full h-full">
+          <img
+            src={imageUrl}
+            alt={alt}
+            className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
+          />
+        </div>
+        
+        <div className="mt-4 text-center">
+          <Button
+            onClick={onClose}
+            variant="outline"
+            className="bg-white/10 text-white border-white/30 hover:bg-white/20"
+          >
+            Close
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Numpad: React.FC<{
   value: string;
@@ -125,6 +170,11 @@ const QuizPage: React.FC<QuizPageProps> = ({
   getQuestionStatus,
   updateCurrentAnswer,
 }) => {
+  const [modalImage, setModalImage] = useState<{
+    url: string;
+    alt: string;
+  } | null>(null);
+
   const currentSectionData = Exam?.examSections?.[currentQuestion[0]];
   const currentQuestionData = currentSectionData?.questions?.[currentQuestion[1]];
 
@@ -143,7 +193,7 @@ const QuizPage: React.FC<QuizPageProps> = ({
         {/* Main content area - fixed at 75% on large screens */}
         <div className="w-full lg:w-3/4 pr-0 lg:pr-6 border-r-2">
           <Card className="border-0 rounded-xl shadow-none overflow-hidden">
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex justify-between items-center mb-6">
                 <div>
                   <span className="inline-block bg-indigo-100 text-indigo-800 text-sm font-medium px-3 py-1 rounded-full">
@@ -187,17 +237,26 @@ const QuizPage: React.FC<QuizPageProps> = ({
               <MathJaxContext>
                 <div className="space-y-6">
                   <div className="p-4 bg-gray-50 rounded-lg text-gray-800 text-lg">
-                    <MathJax
-                      inline
-                    >{currentQuestionData.text}</MathJax>
-                    {currentQuestionData.imageUrl  && <Image
-                      src={currentQuestionData.imageUrl || ""}
-                      alt="Uploaded Image"
-                      width={400}
-                      height={300}
-                      style={{ width: "auto", height: "auto" }}
-                      className="rounded-md border"
-                    />}
+                    <MathJax inline>{currentQuestionData.text}</MathJax>
+                    {currentQuestionData.imageUrl && (
+                      <div className="mt-4 relative group">
+                        <div className="relative w-full max-w-md mx-auto">
+                          <img
+                            src={currentQuestionData.imageUrl}
+                            alt="Question Image"
+                            className="w-full h-auto max-h-64 object-contain rounded-md border border-gray-300 cursor-pointer hover:opacity-95 transition-opacity"
+                            onClick={() => setModalImage({
+                              url: currentQuestionData.imageUrl,
+                              alt: "Question Image"
+                            })}
+                          />
+                          <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
+                            <Maximize2 className="h-3 w-3" />
+                            Click to view fullscreen
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {isNumerical ? (
@@ -208,52 +267,47 @@ const QuizPage: React.FC<QuizPageProps> = ({
                   ) : (
                     <div className="space-y-3 mt-4">
                       {currentQuestionData.options.map((option, index) => (
-                        <div 
-                        key={index}
-                        className={`w-full gap-2 justify-start text-left min-h-[56px] py-4 px-5 rounded-lg text-md font-medium ${currentanswer?.chosenOptions?.some(
-                          (opt) => opt.optionId === option.id
-                        )
-                          ? "bg-indigo-600 text-white hover:bg-indigo-700"
-                          : "text-gray-700 hover:bg-gray-200 hover:text-gray-700"
-                          }`} onClick={() =>
-                          handleAnswer(
-                            currentQuestion[0],
-                            currentQuestion[1],
-                            index
-                          )
-                        }>
+                        <div key={index} className="space-y-2">
                           <div
-                            key={index}
-                            // variant={
-                            //   currentanswer?.chosenOptions?.some(
-                            //     (opt) => opt.optionId === option.id
-                            //   )
-                            //     ? "default"
-                            //     : "outline"
-                            // }
-                            // className={`w-full justify-start text-left min-h-[56px] py-4 px-5 rounded-lg text-md font-medium ${currentanswer?.chosenOptions?.some(
-                            //   (opt) => opt.optionId === option.id
-                            // )
-                            //   ? "bg-indigo-600 text-white hover:bg-indigo-700"
-                            //   : "text-gray-700 hover:bg-gray-200 hover:text-gray-700"
-                            //   }`}
-                            
+                            className={`w-full gap-2 justify-start text-left min-h-[56px] py-4 px-5 rounded-lg text-md font-medium cursor-pointer ${
+                              currentanswer?.chosenOptions?.some(
+                                (opt) => opt.optionId === option.id
+                              )
+                                ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                                : "text-gray-700 hover:bg-gray-100 hover:text-gray-800 border border-gray-200"
+                            }`}
+                            onClick={() =>
+                              handleAnswer(
+                                currentQuestion[0],
+                                currentQuestion[1],
+                                index
+                              )
+                            }
                           >
                             <span className="inline-flex items-center justify-center w-6 h-6 mr-3 rounded-full border border-current">
                               {String.fromCharCode(65 + index)}
                             </span>
                             <MathJax inline>{option.text}</MathJax>
                           </div>
-                          {option.imageUrl  &&
-                            <Image
-                              src={option.imageUrl || ""}
-                              alt="Uploaded Image"
-                              width={200}
-                              height={200}
-                              style={{ width: "auto", height: "auto" }}
-                              className="rounded-md border"
-                            />
-                          }
+                          {option.imageUrl && (
+                            <div className="pl-9 pr-4">
+                              <div className="relative w-full max-w-xs group">
+                                <img
+                                  src={option.imageUrl}
+                                  alt={`Option ${String.fromCharCode(65 + index)} Image`}
+                                  className="w-full h-auto max-h-48 object-contain rounded-md border border-gray-300 cursor-pointer hover:opacity-95 transition-opacity"
+                                  onClick={() => setModalImage({
+                                    url: option.imageUrl,
+                                    alt: `Option ${String.fromCharCode(65 + index)} Image`
+                                  })}
+                                />
+                                <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-xs flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Maximize2 className="h-3 w-3" />
+                                  View fullscreen
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -345,6 +399,16 @@ const QuizPage: React.FC<QuizPageProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Image Modal */}
+      {modalImage && (
+        <ImageModal
+          imageUrl={modalImage.url}
+          alt={modalImage.alt}
+          isOpen={!!modalImage}
+          onClose={() => setModalImage(null)}
+        />
+      )}
     </div>
   );
 };

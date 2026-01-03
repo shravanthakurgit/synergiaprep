@@ -5,6 +5,7 @@ import { JsonValue } from "@prisma/client/runtime/library";
 import { errorResponse, successResponse } from "@/lib/utils/api-responses";
 import { GenerateReportInputValidationSchema } from "@/lib/utils/model-validation-schema";
 import { checkAuthUser } from "@/lib/utils/auth-check-in-exam-api";
+import { C } from "@upstash/redis/zmscore-0SAuWM0q";
 
 
 export async function POST(request: Request, { params }: { params: Promise<{ examId: string }> }) {
@@ -25,6 +26,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ exa
         const {userId,userSubmissionId } = validation.data;
 
         const {examId} = await params;
+        console.log("examId received : ", examId);
 
         const userSubmission = await db.userSubmission.findFirst({
             where: { id : userSubmissionId },
