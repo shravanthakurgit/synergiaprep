@@ -286,7 +286,7 @@ const Page: React.FC = () => {
             )}
           </CardContent>
 
-          <CardFooter className="pt-2">
+          <CardFooter className="pt-2 flex flex-col gap-2">
             <Button
               onClick={() => handleStartTest(test.id)}
               className={`w-full ${isLoggedIn ? "bg-blue-600 hover:bg-blue-700" : "bg-amber-500 hover:bg-amber-600"}`}

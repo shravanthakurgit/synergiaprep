@@ -24,10 +24,10 @@ export default function DeleteExamButton({
 
   const role = session?.user?.role;
 
-  // 🚫 hide button if not admin
+  // hide button if not admin
   if (
     role !== RoleType.ADMIN &&
-    role !== RoleType.SUPER_ADMIN
+    role !== RoleType.SUPERADMIN
   ) {
     return null;
   }

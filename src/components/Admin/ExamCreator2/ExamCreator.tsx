@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { MathJax, MathJaxContext } from "better-react-mathjax";
 import { uploadFileToS3 } from "./action";
+import { set } from "date-fns";
 
 const LOCAL_STORAGE_KEY = "examDetails";
 
@@ -36,6 +37,8 @@ const ExamCreator = ({
   const [examSections, setExamSections] = useState<SectionFormState[]>(
     draft?.examSections || []
   );
+
+  const [isSubmitExam, setSubmitExam] = useState(false)
 
   // In ExamForm.tsx
   const uploadAllImages = async (sections: SectionFormState[]) => {
@@ -75,6 +78,7 @@ const ExamCreator = ({
   const handleExamSubmit = async () => {
     try {
       //console.log('examSections :',examSections);
+      setSubmitExam(true);
 
       const uploadResults = await uploadAllImages(examSections);
 
@@ -132,9 +136,11 @@ const ExamCreator = ({
           }
         });
       });
+      setSubmitExam(false);
     } catch (error) {
       console.error("Error submitting exam:", error);
       // Handle error
+      setSubmitExam(false);
     }
   };
 
@@ -293,7 +299,7 @@ const ExamCreator = ({
               <Button onClick={() => handleExamDraftSubmit()}>
                 Submit Draft
               </Button>
-              <Button onClick={() => handleExamSubmit()}>Submit Exam</Button>
+              <Button disabled={isSubmitExam} onClick={() => handleExamSubmit()}>{isSubmitExam ? "Submitting..." : "Submit Exam"}</Button>
             </div>
             <ExamPreview
               examDetails={ExamDetails}
