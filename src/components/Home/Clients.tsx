@@ -4,6 +4,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Autoplay from "embla-carousel-autoplay";
 import {
   Carousel,
@@ -13,14 +14,10 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
-const clients = [
+const clientshome = [
   {
     name: "coderAssembly",
     href: "https://coderassembly.in",
-  },
-  {
-    name: "magtech",
-    href: "https://magellanium.com",
   },
   {
     name: "platformAcademy",
@@ -29,6 +26,13 @@ const clients = [
   {
     name: "platformEdu",
     href: "https://platformedu.org.in/",
+  },
+];
+
+const clientsp = [
+  {
+    name: "magtech",
+    href: "https://magellanium.com",
   },
   {
     name: "redsoft",
@@ -40,7 +44,11 @@ const clients = [
   },
 ];
 
-export default function Client() {
+export default function Clients() {
+  const pathname = usePathname();
+  const isHomePage = pathname === "/";
+  const clients = isHomePage ? clientshome : clientsp;
+
   const [showArrows, setShowArrows] = React.useState(true);
 
   React.useEffect(() => {
@@ -64,7 +72,7 @@ export default function Client() {
   );
 
   return (
-    <div className="py-20">
+    <div className="pt-[-2rem]">
       <div className="container mx-auto px-6">
         <h2 className="text-4xl font-bold text-center">Our Clients</h2>
         <p className="text-muted-foreground mb-12 text-center">
@@ -80,27 +88,25 @@ export default function Client() {
             plugins={[plugin]}
           >
             <CarouselContent>
-              {clients.map((client, idx) => (
-                <CarouselItem
-                  key={idx}
-                  className="basis-1/2 lg:basis-1/4 pl-4 cursor-pointer"
-                >
-                  <Card
-                    key={idx}
-                    className="p-3 flex items-center justify-center"
+              {/* Loop through the clients array 3 times to create a continuous effect */}
+              {[...Array(3)].map((_, loopIndex) =>
+                clients.map((client, idx) => (
+                  <CarouselItem
+                    key={`${loopIndex}-${idx}`}
+                    className="basis-1/2 lg:basis-1/4 pl-4 cursor-pointer"
                   >
-                    <Image
-                      src={`/assets/Clients/${client.name}.jpg`}
-                      alt={`Client ${client}`}
-                      width={128}
-                      height={128}
-                      className="w-32 h-20 object-contain border-none"
-                    />
-                    {/* <Link href={client.href} target="_blank">
-                    </Link> */}
-                  </Card>
-                </CarouselItem>
-              ))}
+                    <Card className="p-3 flex items-center justify-center">
+                      <Image
+                        src={`/assets/Clients/${client.name}.jpg`}
+                        alt={`Client ${client.name}`}
+                        width={128}
+                        height={128}
+                        className="w-32 h-20 object-contain border-none"
+                      />
+                    </Card>
+                  </CarouselItem>
+                ))
+              )}
             </CarouselContent>
             {showArrows && (
               <>

@@ -5,15 +5,20 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "unsplash.com",
+        hostname: "images.unsplash.com", // Changed from "unsplash.com"
         port: "",
-        pathname: "/photos/**",
+        pathname: "/**", // Use /** to allow all paths
+      },
+      {
+        protocol: "https",
+        hostname: "unsplash.com", // Keep this if you might use other unsplash subdomains
+        port: "",
+        pathname: "/**",
       },
       {
         protocol: "https",
         hostname: "picsum.photos",
         port: "",
-        // Allow all paths from picsum.photos (e.g. /id/0/200/300)
         pathname: "/**",
       },
       {
@@ -31,20 +36,20 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "project-0.s3.eu-north-1.amazonaws.com",
-        pathname: "/**"
-      }
+        pathname: "/**",
+      },
     ],
     localPatterns: [
       {
-        pathname: '/assets/**',
-        search: '',
+        pathname: "/assets/**",
+        search: "",
       },
     ],
   },
   experimental: {
-      serverActions: {
-          bodySizeLimit: '1000mb',
-      }
+    serverActions: {
+      bodySizeLimit: "1000mb",
+    },
   },
 };
 

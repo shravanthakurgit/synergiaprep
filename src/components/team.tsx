@@ -48,18 +48,10 @@ export default function Team() {
     {
       img: "/assets/images/Mouli.jpg",
       h1: "Mouli Kalsa",
-      p: ["Co-Founder and CMO"],
+      p: ["Director and CMO"],
       expertise: ["Marketing", "Brand Development", "Communication"],
       bio: "Expert in marketing strategies and brand development.",
       achievements: ["Developed successful marketing campaigns.", "Enhanced brand visibility."],
-    },
-    {
-      img: "/assets/images/HrithikChowdhury.webp",
-      h1: "Hrithik Chowdhury",
-      p: ["Co-founder & CTO"],
-      expertise: ["Technology", "Software Development", "AI"],
-      bio: "Technology enthusiast leading our technical vision.",
-      achievements: ["Implemented cutting-edge AI solutions.", "Oversaw major tech projects."],
     },
   ];
 

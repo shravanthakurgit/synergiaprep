@@ -22,6 +22,7 @@ import {
   FileDown,
   GraduationCap,
 } from "lucide-react";
+import Image from "next/image";
 
 const demoFeatures = [
   {
@@ -85,55 +86,49 @@ const demoFeatures = [
   },
 ];
 
-// Simplified faculty data
+// Updated faculty data with your actual information
 const facultyMembers = [
   {
     id: 1,
-    name: "Dr. Rajesh Kumar",
-    subject: "Physics",
-    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Rajesh",
+    name: "Dr. Arnab Das",
+    qualification: "PhD from Jadavpur University",
+    expertise: "Physics",
+    image: "/assets/Faculty/arnab das.png",
   },
   {
     id: 2,
-    name: "Prof. Anjali Sharma",
-    subject: "Chemistry",
-    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Anjali",
+    name: "Dr. D. Roy",
+    qualification: "PhD from Jadavpur University",
+    expertise: "Chemistry",
+    image: "/placeholder.svg", // Placeholder for missing image
   },
   {
     id: 3,
-    name: "Dr. Vikram Singh",
-    subject: "Mathematics",
-    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Vikram",
+    name: "Mr. Tanbir Ahammed",
+    qualification: "B.E. & M.Tech from Jadavpur University",
+    expertise: "Mathematics",
+    image: "/assets/Faculty/tanbir ahammed.png",
   },
   {
     id: 4,
-    name: "Ms. Priya Patel",
-    subject: "Biology",
-    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Priya",
+    name: "Mr. Mahamood Hasan",
+    qualification: "B.E. from Jadavpur University",
+    expertise: "Physics",
+    image: "/assets/Faculty/mahamood hasan.png",
   },
   {
     id: 5,
-    name: "Dr. Amit Verma",
-    subject: "Computer Science",
-    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Amit",
+    name: "Mr. Mousom Roy",
+    qualification: "M.Tech., Pursuing PhD from Jadavpur University",
+    expertise: "Chemistry",
+    image: "/assets/Faculty/mousom roy.png",
   },
   {
     id: 6,
-    name: "Prof. Neha Gupta",
-    subject: "English",
-    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Neha",
-  },
-  {
-    id: 7,
-    name: "Dr. Sanjay Mehta",
-    subject: "Economics",
-    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sanjay",
-  },
-  {
-    id: 8,
-    name: "Ms. Deepika Reddy",
-    subject: "Reasoning",
-    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Deepika",
+    name: "Mr. Najes Riaz",
+    qualification: "M.Sc. in Physics from Calcutta University",
+    expertise: "Physics",
+    image: "/assets/Faculty/najes riaz.png",
   },
 ];
 
@@ -348,32 +343,47 @@ const DemoPage = () => {
               {duplicatedFaculty.map((faculty, index) => (
                 <div
                   key={`${faculty.id}-${index}`}
-                  className="flex-shrink-0 w-48 group hover:scale-105 transition-transform duration-300"
+                  className="flex-shrink-0 w-64 group hover:scale-105 transition-transform duration-300"
                 >
                   {/* Faculty Card */}
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 shadow-sm hover:shadow-md border border-gray-100 transition-all duration-300">
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 shadow-sm hover:shadow-md border border-gray-100 transition-all duration-300 h-full">
                     {/* Faculty Image */}
                     <div className="relative mx-auto mb-4">
-                      <div className="w-24 h-24 mx-auto rounded-full overflow-hidden border-4 border-white shadow-md">
-                        <img
-                          src={faculty.image}
-                          alt={faculty.name}
-                          className="w-full h-full object-cover"
-                        />
+                      <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-white shadow-md bg-gradient-to-br from-gray-100 to-gray-200">
+                        {faculty.image === "/placeholder.svg" ? (
+                          // Placeholder for Dr. D. Roy
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100">
+                            <GraduationCap className="h-16 w-16 text-blue-400" />
+                          </div>
+                        ) : (
+                          <Image
+                            src={faculty.image}
+                            alt={faculty.name}
+                            width={128}
+                            height={128}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
                       </div>
                       <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                        {faculty.subject}
+                        {faculty.expertise}
                       </div>
                     </div>
 
                     {/* Faculty Info */}
                     <div className="text-center">
-                      <h3 className="font-bold text-gray-900 text-lg mb-1">
+                      <h3 className="font-bold text-gray-900 text-lg mb-2">
                         {faculty.name}
                       </h3>
-                      <p className="text-gray-600 text-sm">
-                        {faculty.subject} Expert
+                      <p className="text-gray-700 text-sm mb-3">
+                        {faculty.qualification}
                       </p>
+                      <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-indigo-100 px-3 py-1 rounded-full">
+                        <GraduationCap className="h-4 w-4 text-blue-600" />
+                        <span className="text-blue-700 font-medium text-sm">
+                          {faculty.expertise} Expert
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -74,11 +74,6 @@ export const TechTeam = () => {
     member,
   }) => (
     <Card className="bg-background hover:shadow-lg transition-shadow duration-300">
-      {/* Placeholder box for image */}
-      <div className="w-full h-36 md:h-44 bg-gray-200 rounded-t-lg flex items-center justify-center text-gray-400 font-semibold">
-        Photo
-      </div>
-
       <CardContent className="p-6 flex flex-col justify-around space-y-4 text-center">
         <h3 className="text-lg md:text-xl font-bold">{member.name}</h3>
         <p className="text-sm md:text-base text-muted-foreground">

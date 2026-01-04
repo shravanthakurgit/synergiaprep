@@ -29,6 +29,52 @@ interface PageLayoutProps {
   children: React.ReactNode;
 }
 
+/* ================= DEMO DATA ================= */
+
+const DEMO_COURSES: Course[] = [
+  {
+    courseId: "study-abroad-101",
+    banner:
+      "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?q=80&w=2070",
+    title: "Study Abroad Application Masterclass",
+    summary:
+      "Comprehensive guide to successful international university applications",
+    skills: [
+      "Application Strategy",
+      "SOP Writing",
+      "Interview Preparation",
+      "Visa Process",
+    ],
+    objective:
+      "Equip students with skills to craft winning applications for top global universities",
+    outcome:
+      "Students will complete 3-5 polished applications with compelling personal statements",
+    coordinator: "Dr. Sarah Chen",
+    duration: "8 weeks",
+    startDate: "2024-03-15",
+    level: "PREMIUM",
+  },
+  {
+    courseId: "mba-international",
+    banner:
+      "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=2070",
+    title: "Global MBA Admissions",
+    summary: "Strategic preparation for top business schools worldwide",
+    skills: [
+      "GMAT/GRE Prep",
+      "Leadership Essays",
+      "Networking",
+      "Case Interviews",
+    ],
+    objective: "Secure admission to top 50 global MBA programs",
+    outcome: "Complete application package for 5 target schools",
+    coordinator: "Dr. Michael Rodriguez",
+    duration: "12 weeks",
+    startDate: "2024-03-20",
+    level: "STANDARD",
+  },
+];
+
 /* ================= DATA HOOK ================= */
 
 const useData = <T,>(url: string) => {
@@ -40,14 +86,19 @@ const useData = <T,>(url: string) => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(url, { cache: "no-store" });
+        // For demo purposes, use mock data
+        // Comment out the fetch and uncomment below for real API
+        // const response = await fetch(url, { cache: "no-store" });
+        // if (!response.ok) {
+        //   throw new Error(`Failed to fetch data from ${url}`);
+        // }
+        // const jsonData = await response.json();
+        // setData(jsonData.courses);
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch data from ${url}`);
-        }
-
-        const jsonData = await response.json();
-        setData(jsonData.courses);
+        // Using demo data
+        setTimeout(() => {
+          setData(DEMO_COURSES as T);
+        }, 800); // Simulate loading delay
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
@@ -85,7 +136,7 @@ const SkeletonCard = () => (
 const LoadingSkeleton = () => (
   <PageLayout>
     <div className="max-w-7xl mx-auto px-4 py-10 flex flex-wrap gap-5 justify-center">
-      {[...Array(6)].map((_, index) => (
+      {[...Array(2)].map((_, index) => (
         <SkeletonCard key={index} />
       ))}
     </div>
@@ -112,7 +163,7 @@ const CourseGrid = ({ courses }: { courses: Course[] }) => {
         className="text-center text-white mb-8 px-4"
       >
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-          Study Abroad
+          Certificate Course
         </h1>
         <p className="text-base sm:text-lg md:text-xl">
           Explore global education opportunities
@@ -137,12 +188,12 @@ const CourseGrid = ({ courses }: { courses: Course[] }) => {
                 subtitle: course.summary || "",
                 description: course.objective || "",
                 instructor: course.coordinator || "Unknown Instructor",
-                rating: 0,
-                reviewCount: 0,
-                enrollmentCount: 0,
-                price: 0,
-                discount: 0,
-                bestseller: false,
+                rating: 4.7,
+                reviewCount: 89,
+                enrollmentCount: 1250,
+                price: course.level === "PREMIUM" ? 699 : 499,
+                discount: course.level === "PREMIUM" ? 100 : 50,
+                bestseller: course.level === "PREMIUM",
                 level: (() => {
                   const l = course.level?.toUpperCase();
                   return l === "BASIC" || l === "STANDARD" || l === "PREMIUM"

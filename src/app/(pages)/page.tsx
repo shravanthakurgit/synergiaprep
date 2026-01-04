@@ -24,6 +24,16 @@ const Certifications = () => {
     img7: "/assets/images/Library.jpg",
   };
 
+  // Updated points list
+  const points = [
+    "Designed in collaboration with industry experts",
+    "Focus on practical, job-ready skills",
+    "Hands-on learning through real-world projects",
+    "Short-term courses with flexible learning options",
+    "Certificates aligned with current industry demands",
+    "Ideal for students and working professionals",
+  ];
+
   return (
     <div className="mt-10">
       {/* Banner Section */}
@@ -59,78 +69,100 @@ const Certifications = () => {
         {/* Left Section */}
         <div className="space-y-6">
           <div className="flex gap-6">
-            <div
-              className="flex-1 h-56 bg-cover bg-center rounded-xl p-4 text-white flex flex-col justify-end"
-              style={{ backgroundImage: `url(${images.img7})` }}
-            >
-              <ul className="space-y-1 text-sm font-semibold">
-                <li className="text-2xl">100+</li>
-                <li>An exceptionally unique experience tailored to you</li>
-              </ul>
+            {/* First Image with rounded bottom corners */}
+            <div className="flex-1 relative">
+              <div className="h-56 rounded-xl overflow-hidden">
+                <Image
+                  src={images.img7}
+                  alt="Library"
+                  width={600}
+                  height={224}
+                  className="w-full h-full object-cover rounded-t-xl" // Fixed: Added rounded-t-xl
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent rounded-xl"></div>
+                <div className="absolute bottom-4 left-4 text-white">
+                  <p className="text-2xl font-bold">100+</p>
+                  <p className="text-sm font-semibold max-w-[200px]">
+                    An exceptionally unique experience tailored to you
+                  </p>
+                </div>
+              </div>
             </div>
-            <Image
-              src={images.img2}
-              alt="Image 2"
-              width={300}
-              height={224}
-              className="rounded-xl w-1/2 object-cover"
-            />
+
+            {/* Second Image */}
+            <div className="w-1/2 relative">
+              <Image
+                src={images.img2}
+                alt="Image 2"
+                width={300}
+                height={224}
+                className="rounded-xl w-full h-56 object-cover"
+              />
+            </div>
           </div>
 
-          <div
-            className="h-56 bg-cover bg-[center_bottom_90%] rounded-xl p-4 text-white flex flex-col justify-end"
-            style={{ backgroundImage: `url(${images.img3})` }}
-          >
-            <div>
+          {/* Third Image with proper object position to show face */}
+          <div className="relative h-56 rounded-xl overflow-hidden">
+            <Image
+              src={images.img3}
+              alt="Image 3"
+              width={600}
+              height={260}
+              className="w-full h-full object-cover object-[center_30%]" // Fixed: Adjusted object position to show face
+              style={{ objectPosition: "center 10%" }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent rounded-xl"></div>
+            <div className="absolute bottom-4 left-4 text-white">
               <p className="text-2xl font-bold">200+</p>
-              <p>Aggregates job opportunities from multiple sources</p>
+              <p className="text-sm">
+                Aggregates job opportunities from multiple sources
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Right Section */}
+        {/* Right Section with updated points */}
         <div className="space-y-8">
           <h2 className="text-4xl font-bold">
             A Truly Personalized Learning Journey Designed Just for You
           </h2>
-          <ul className="space-y-8 text-3xl">
-            {[
-              "Undergraduate Programs",
-              "Postgraduate and Master's programs",
-              "PhD and Research Programs",
-              "Language Programs",
-              "Foundation and Pathway Programs",
-            ].map((text, index) => (
-              <li key={index} className="flex items-center gap-3 text-gray-700">
-                <BsCheck2Circle className="text-blue-600" />
-                {text}
+          <ul className="space-y-6">
+            {points.map((text, index) => (
+              <li key={index} className="flex items-start gap-4 text-gray-700">
+                <BsCheck2Circle className="text-blue-600 flex-shrink-0 mt-1 w-6 h-6" />
+                <span className="text-lg">{text}</span>
               </li>
             ))}
           </ul>
           <Link href="/study-abroad" className="inline-block">
-            <button className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition">
+            <button className="mt-4 bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 transition text-lg font-medium">
               Join Us
             </button>
           </Link>
         </div>
       </div>
 
-      {/* Bottom Row of Images */}
+      {/* Bottom Row of Images - Fixed positioning */}
       <div className="mt-16 grid md:grid-cols-2 gap-6 px-4 md:px-20">
-        <Image
-          src={images.img4}
-          alt="Study 4"
-          width={600}
-          height={288}
-          className="h-72 w-full rounded-xl shadow-md object-cover"
-        />
-        <Image
-          src={images.img6}
-          alt="Study 6"
-          width={600}
-          height={288}
-          className="h-72 w-full rounded-xl shadow-md object-cover object-[center_10%]"
-        />
+        <div className="relative h-72 rounded-xl overflow-hidden shadow-md">
+          <Image
+            src={images.img4}
+            alt="Study 4"
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
+        </div>
+        <div className="relative h-72 rounded-xl overflow-hidden shadow-md">
+          <Image
+            src={images.img6}
+            alt="Study 6"
+            fill
+            className="object-cover object-[center_20%]" // Fixed: Adjusted to show more of the face
+            style={{ objectPosition: "center 20%" }}
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
+        </div>
       </div>
     </div>
   );
@@ -161,11 +193,11 @@ export default function Page() {
       <Hero />
       <About />
       <MissionVission />
-      <ChooseUs />
-      <Services />
-      <div className="mx-auto">
+      {/* <ChooseUs /> */}
+      {/* <Services /> */}
+      {/* <div className="mx-auto">
         <ExamCarousel items={items} />
-      </div>
+      </div> */}
       <Certifications />
       <ExpertsTalk />
       <Team />

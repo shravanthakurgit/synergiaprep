@@ -107,19 +107,21 @@ export const AdvisoryBoard: React.FC<AdvisoryBoardProps> = ({
                 onClick={() => setSelectedAdvisor(advisor)}
               >
                 <div className="relative p-4 flex justify-center">
-                  <Avatar className="w-40 h-40">
-                    <AvatarImage
-                      src={advisor.image}
-                      alt={advisor.name}
-                      className="object-cover"
-                    />
-                    <AvatarFallback className="text-4xl bg-primary/10">
-                      {advisor.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="w-40 h-40 rounded-full overflow-hidden">
+                    <Avatar className="w-full h-full">
+                      <AvatarImage
+                        src={advisor.image}
+                        alt={advisor.name}
+                        className="object-scale-down bg-white" // Changed from object-cover to object-scale-down
+                      />
+                      <AvatarFallback className="text-4xl bg-primary/10">
+                        {advisor.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
                 </div>
 
                 <CardContent className="text-center flex-grow flex flex-col">
@@ -165,19 +167,21 @@ export const AdvisoryBoard: React.FC<AdvisoryBoardProps> = ({
                     <TabsContent value="profile" className="space-y-6 p-4">
                       <div className="flex flex-col md:flex-row gap-8 items-center">
                         <div className="md:w-1/3 flex justify-center">
-                          <Avatar className="w-52 h-52 border-4 border-primary/20 rounded-xl">
-                            <AvatarImage
-                              src={selectedAdvisor.image}
-                              alt={selectedAdvisor.name}
-                              className="object-cover"
-                            />
-                            <AvatarFallback className="text-6xl bg-primary/10">
-                              {selectedAdvisor.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </AvatarFallback>
-                          </Avatar>
+                          <div className="w-52 h-52 rounded-xl overflow-hidden border-4 border-primary/20">
+                            <Avatar className="w-full h-full">
+                              <AvatarImage
+                                src={selectedAdvisor.image}
+                                alt={selectedAdvisor.name}
+                                className="object-scale-down bg-white" // Changed from object-cover to object-scale-down
+                              />
+                              <AvatarFallback className="text-6xl bg-primary/10">
+                                {selectedAdvisor.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
+                              </AvatarFallback>
+                            </Avatar>
+                          </div>
                         </div>
                         <div className="md:w-2/3">
                           <div className="space-y-2 mb-4">
