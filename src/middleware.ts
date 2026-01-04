@@ -8,6 +8,8 @@ import {
 } from "./route";
 import { RoleType } from "@prisma/client";
 
+export const runtime = "nodejs"; 
+
 const { auth } = NextAuth(authConfig);
 
 export const middleware = auth((req) => {
@@ -16,19 +18,16 @@ export const middleware = auth((req) => {
   const res = NextResponse.next();
 
   const isLoggedIn = !!req.auth;
-  const isAuthRoute = authRoutes.includes(pathname);
 
+  const isAuthRoute = authRoutes.includes(pathname);
   const isAdminRoute = adminRoutes.some((route) =>
     pathname.startsWith(route)
   );
-
   const isPrivateRoute = privateRoutes.some((route) =>
     pathname.startsWith(route)
   );
 
-  // =====================
-  // ADMIN ROUTES
-  // =====================
+  // Admin routes
   if (isAdminRoute) {
     if (!isLoggedIn) {
       const loginUrl = new URL("/login", nextUrl);
@@ -37,7 +36,6 @@ export const middleware = auth((req) => {
     }
 
     const role = req.auth?.user?.role?.toUpperCase();
-
     if (
       role !== RoleType.ADMIN &&
       role !== RoleType.SUPERADMIN
@@ -50,21 +48,14 @@ export const middleware = auth((req) => {
     return res;
   }
 
-  // =====================
-  // PRIVATE ROUTES
-  // =====================
-  if (isPrivateRoute) {
-    if (!isLoggedIn) {
-      const loginUrl = new URL("/login", nextUrl);
-      loginUrl.searchParams.set("next", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-    return res;
+  // Private routes
+  if (isPrivateRoute && !isLoggedIn) {
+    const loginUrl = new URL("/login", nextUrl);
+    loginUrl.searchParams.set("next", pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
-  // =====================
-  // AUTH ROUTES
-  // =====================
+  // Auth routes
   if (isAuthRoute && isLoggedIn) {
     return NextResponse.redirect(
       new URL("/examprep/dashboard", nextUrl)
