@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import QuizHeader from "./QuizHeader";
 import { submitAttempt } from "@/lib/evaluation-hooks/report-functions";
+import StudyTracker from "../StudyTracker";
 
 const QuizApp = () => {
   const { data: session } = useSession();
@@ -444,6 +445,7 @@ const QuizApp = () => {
   };
 
   return (
+    <StudyTracker>
     <div className="min-h-screen">
       {session && currentStep !== "submitted" && (
         <QuizHeader
@@ -532,6 +534,7 @@ const QuizApp = () => {
         <SubmittedPage />
       )}
     </div>
+    </StudyTracker>
   );
 };
 

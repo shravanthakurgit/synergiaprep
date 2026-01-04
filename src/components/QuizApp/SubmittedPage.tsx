@@ -2,10 +2,12 @@ import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, ArrowLeft, X } from "lucide-react";
+import StudyTracker from "../StudyTracker";
 
 const SubmittedPage: React.FC = () => {
   const date = new Date().toLocaleString();
   return (
+    <StudyTracker>
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
       {/* Header */}
       <header className="w-full py-4 px-6 bg-white border-b border-gray-200 flex justify-between items-center">
@@ -93,6 +95,7 @@ const SubmittedPage: React.FC = () => {
         </div>
       </footer>
     </div>
+    </StudyTracker>
   );
 };
 

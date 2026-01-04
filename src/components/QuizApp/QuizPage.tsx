@@ -24,6 +24,7 @@ import QuestionPanel from "./QuestionPanel";
 import { Exam, OptionSelection } from "@/types/examTypes";
 import { MathJax, MathJaxContext } from "better-react-mathjax";
 import Image from "next/image";
+import StudyTracker from "../StudyTracker";
 
 interface QuizPageProps {
   Exam: Exam;
@@ -188,6 +189,7 @@ const QuizPage: React.FC<QuizPageProps> = ({
     !isNumerical && currentSectionData.sectionConfig.partialMarks.length > 1;
 
   return (
+    <StudyTracker>
     <div className="bg-white">
       <div className="max-w-screen-xl mx-auto px-4 flex">
         {/* Main content area - fixed at 75% on large screens */}
@@ -410,6 +412,7 @@ const QuizPage: React.FC<QuizPageProps> = ({
         />
       )}
     </div>
+    </StudyTracker>
   );
 };
 
