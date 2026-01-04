@@ -114,18 +114,18 @@ export function Hero() {
               <div className="space-y-6 sm:space-y-8">
                 <div>
                   <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                    "Joddha" - Our YouTube Initiative
+                    {`"Joddha" - Our YouTube Initiative`}
                   </h2>
                   <p className="text-lg sm:text-xl md:text-2xl font-semibold text-blue-700 mb-6">
-                    Bengal's Brightest, Building Bengal's Future.
+                    {`Bengal's Brightest, Building Bengal's Future.`}
                   </p>
                   <p className="text-gray-700 text-base sm:text-lg leading-relaxed">
-                    Joddha is more than just a startup; it is a movement to
+                    {`Joddha is more than just a startup; it is a movement to
                     revolutionize education in our state. Founded by a
                     prestigious group of Doctors, Engineers, and Alums of
                     Jadavpur University, we combine academic rigor with local
                     insight to help every student become a "Joddha" (Warrior) in
-                    their field.
+                    their field.`}
                   </p>
                 </div>
 
