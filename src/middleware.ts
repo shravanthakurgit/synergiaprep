@@ -67,10 +67,10 @@ export const middleware = async (req: NextRequest) => {
 
   // Logged in but not admin
   if (!role || !ADMIN_ROLES.includes(role)) {
-      const redirectUrl = new URL("/login", nextUrl);
+      const redirectUrl = new URL("/examprep", nextUrl);
       return NextResponse.redirect(redirectUrl);
   }
-  return res;
+  return NextResponse.next();
   }
 
   // Auth route handling
