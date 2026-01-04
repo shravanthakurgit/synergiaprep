@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Exam } from "@/types/examTypes";
+import StudyTracker from "../StudyTracker";
 
 interface InfoPageProps {
   acceptedTerms: boolean;
@@ -21,6 +22,7 @@ const InfoPage: React.FC<InfoPageProps> = ({
   questionStatuses,
 }) => {
   return (
+    <StudyTracker>
     <div className="w-full mx-auto p-4 bg-white">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1 className="text-xl sm:text-2xl font-bold text-blue-900">
@@ -147,6 +149,7 @@ const InfoPage: React.FC<InfoPageProps> = ({
         © All Rights Reserved - SynergiaPrep Pvt. Ltd.
       </footer>
     </div>
+    </StudyTracker>
   );
 };
 
