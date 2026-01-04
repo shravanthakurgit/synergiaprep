@@ -20,7 +20,6 @@ import { User, Shield, Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import {
-  uploadImg,
   deleteServerSide,
 } from "@/app/actions/img";
 
@@ -103,7 +102,14 @@ export default function ProfileAccount() {
         const originalFileData = fileData as ArrayBuffer;
 
         // Pass the original file data to uploadImg
-        await uploadImg(presignedURL.toString(), originalFileData, file);
+        await fetch(presignedURL.toString(), {
+  method: "PUT",
+  headers: {
+    "Content-Type": file.type,
+  },
+  body: originalFileData, // ArrayBuffer is valid here
+});
+
 
         const imageUrl = `/uploads/${file.name}`;
         setImage(imageUrl);

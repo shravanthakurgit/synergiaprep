@@ -21,13 +21,16 @@ export default function Home() {
         presignedURL.searchParams.set("contentType", file.type);
         
         // Use original file data directly
-        const check = await uploadImg(
-          presignedURL.toString(),
-          fileData as ArrayBuffer,
-          file
-        );
+        await fetch(presignedURL.toString(), {
+  method: "PUT",
+  headers: {
+    "Content-Type": file.type,
+  },
+  body: fileData, // ArrayBuffer is valid here
+});
 
-        console.log(check ? "File uploaded successfully" : "Upload failed");
+
+        console.log("File uploaded successfully");
       }
     };
     reader.readAsArrayBuffer(file);
