@@ -590,7 +590,7 @@ const ArchivesPage: React.FC = () => {
                       className="bg-green-600 hover:bg-green-700"
                       disabled={isAdding || !formData.title || !formData.downloadUrl }
                     >
-                      {isAdding ? "Adding..." : "Add PDF To Archive"}
+                      {isAdding ? 'Adding...' : 'Add PDF To Archive'}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -624,7 +624,7 @@ const ArchivesPage: React.FC = () => {
             <DialogFooter className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button>
               <Button disabled={isDeleteing} className="bg-red-600 hover:bg-red-700" onClick={handleDeletePdf}>
-                {isDeleteing ? "Deleting..." : "Delete"}
+                {isDeleteing ? 'Deleting...' : 'Delete'}
               </Button>
             </DialogFooter>
           </DialogContent>
