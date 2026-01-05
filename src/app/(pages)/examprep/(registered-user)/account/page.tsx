@@ -302,7 +302,7 @@ export default function ProfileAccount() {
                     </AvatarFallback>
                   </Avatar>
 
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <Button onClick={handleChangePhoto}>
                       Change Photo
                     </Button>
@@ -316,7 +316,9 @@ export default function ProfileAccount() {
                     <Button variant="ghost" onClick={removeImage}>
                       Remove
                     </Button>
-                  </div>
+                  </div> */}
+
+                  
                 </div>
 
                 <Separator />
