@@ -71,7 +71,7 @@ const Page: React.FC = () => {
     const fetchpyqTests = async () => {
       setLoading(true);
       try {
-        const response = await fetch("/api/v1/exams?type=pyq");
+        const response = await fetch("/api/v1/exams?type=mock");
         const data = await response.json();
         setpyqTests(data.data as pyqTest[]);
       } catch (e) {
@@ -148,9 +148,9 @@ const Page: React.FC = () => {
     return (
       <div className="container mx-auto p-4">
         <div className="bg-gradient-to-r from-emerald-50 to-green-50 py-16 text-center mb-8 rounded-lg shadow-sm border">
-          <h1 className="text-4xl font-bold mb-4 text-gray-900">PYQ Bank</h1>
+          <h1 className="text-4xl font-bold mb-4 text-gray-900">Mock Tests</h1>
           <p className="text-xl text-gray-600">
-            Loading previous year questions...
+            Loading mock questions...
           </p>
         </div>
         <Loading />
@@ -283,7 +283,7 @@ const Page: React.FC = () => {
             {!isLoggedIn && (
               <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 p-2 rounded-lg mb-2">
                 <Lock className="h-4 w-4" />
-                <span>Login required to attempt this PYQ</span>
+                <span>Login required to attempt this mock</span>
               </div>
             )}
           </CardContent>
@@ -412,7 +412,7 @@ const Page: React.FC = () => {
               {!isLoggedIn && (
                 <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 p-2 rounded-lg mt-2">
                   <Lock className="h-4 w-4" />
-                  <span>Login required to attempt this PYQ</span>
+                  <span>Login required to attempt this Mock</span>
                 </div>
               )}
             </div>
@@ -436,7 +436,7 @@ const Page: React.FC = () => {
       <div className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-100 py-12 text-center mb-8 rounded-lg shadow-sm">
         <h1 className="text-4xl font-bold mb-4 text-gray-900">MOCK</h1>
         <p className="text-xl text-gray-600 mb-4">
-          Previous Year Question Papers with detailed solutions
+          Mock Papers with detailed solutions
         </p>
         {!isLoggedIn && (
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -465,7 +465,7 @@ const Page: React.FC = () => {
               <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <Input
-                  placeholder="Search PYQs by title or subject"
+                  placeholder="Search Mock by title or subject"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 w-full"
@@ -615,7 +615,7 @@ const Page: React.FC = () => {
         <div className="text-center py-12 bg-gray-50 rounded-lg border">
           <TrendingUp className="mx-auto h-16 w-16 text-gray-400 mb-4" />
           <p className="text-xl text-gray-600 mb-2">
-            No PYQ tests found matching your filters
+            No Mock tests found matching your filters
           </p>
           <Button onClick={resetFilters} variant="outline">
             Clear Filters
