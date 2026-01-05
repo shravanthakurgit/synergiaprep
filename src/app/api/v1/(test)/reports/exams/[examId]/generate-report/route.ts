@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { $Enums } from "@prisma/client";
+import { $Enums, Prisma } from "@prisma/client";
 import { JsonValue } from "@prisma/client/runtime/library";
 import { errorResponse, successResponse } from "@/lib/utils/api-responses";
 import { GenerateReportInputValidationSchema } from "@/lib/utils/model-validation-schema";
@@ -97,56 +97,67 @@ export async function POST(
 
     const report = generateReport(examAttempt, examStats, userSubmission);
 
-    const savedReport = await db.analysisReport.create({
-      data: {
-        examAttemptId: examAttempt.id,
-
-        // Use JSON field for overallPerformance which contains everything
-        overallPerformance: report.overallPerformance as any,
-        topicWisePerformance: report.topicWisePerformance as any,
-        difficultyWisePerformance: report.difficultyWisePerformance as any,
-        timeManagement: report.timeManagement as any,
-        strengthsAndWeaknesses: report.strengthsAndWeaknesses as any,
-        suggestedImprovements: report.suggestedImprovements as any,
-
-        // Only add structured fields if they exist in the schema
-        ...(report.overallPerformance.score !== undefined && {
-          score: report.overallPerformance.score,
-        }),
-        ...(report.overallPerformance.percentile !== undefined && {
-          percentile: report.overallPerformance.percentile,
-        }),
-        ...(report.overallPerformance.rank !== undefined && {
-          rank: report.overallPerformance.rank,
-        }),
-        ...(report.overallPerformance.accuracy !== undefined && {
-          accuracy: report.overallPerformance.accuracy,
-        }),
-        ...(report.overallPerformance.totalQuestions !== undefined && {
-          totalQuestions: report.overallPerformance.totalQuestions,
-        }),
-        ...(report.overallPerformance.attemptedQuestions !== undefined && {
-          attemptedQuestions: report.overallPerformance.attemptedQuestions,
-        }),
-        ...(report.overallPerformance.correctAnswers !== undefined && {
-          correctAnswers: report.overallPerformance.correctAnswers,
-        }),
-        ...(report.overallPerformance.incorrectAnswers !== undefined && {
-          incorrectAnswers: report.overallPerformance.incorrectAnswers,
-        }),
-        ...(report.overallPerformance.unattemptedQuestions !== undefined && {
-          unattemptedQuestions: report.overallPerformance.unattemptedQuestions,
-        }),
-        ...(report.overallPerformance.maxMarks !== undefined && {
-          maxMarks: report.overallPerformance.maxMarks,
-        }),
-        ...(report.timeManagement.totalTimeTaken !== undefined && {
-          totalTimeTaken: report.timeManagement.totalTimeTaken,
-        }),
-        ...(report.timeManagement.averageTimePerQuestion !== undefined && {
-          averageTimePerQuestion: report.timeManagement.averageTimePerQuestion,
-        }),
+    // Convert report data to Prisma.InputJsonValue with proper type assertion
+    const createData: Prisma.AnalysisReportCreateInput = {
+      examAttempt: {
+        connect: { id: examAttempt.id },
       },
+      overallPerformance:
+        report.overallPerformance as unknown as Prisma.InputJsonValue,
+      topicWisePerformance:
+        report.topicWisePerformance as unknown as Prisma.InputJsonValue,
+      difficultyWisePerformance:
+        report.difficultyWisePerformance as unknown as Prisma.InputJsonValue,
+      timeManagement: report.timeManagement as unknown as Prisma.InputJsonValue,
+      strengthsAndWeaknesses:
+        report.strengthsAndWeaknesses as unknown as Prisma.InputJsonValue,
+      suggestedImprovements:
+        report.suggestedImprovements as unknown as Prisma.InputJsonValue,
+    };
+
+    // Add scalar fields conditionally
+    if (report.overallPerformance.score !== undefined) {
+      createData.score = report.overallPerformance.score;
+    }
+    if (report.overallPerformance.percentile !== undefined) {
+      createData.percentile = report.overallPerformance.percentile;
+    }
+    if (report.overallPerformance.rank !== undefined) {
+      createData.rank = report.overallPerformance.rank;
+    }
+    if (report.overallPerformance.accuracy !== undefined) {
+      createData.accuracy = report.overallPerformance.accuracy;
+    }
+    if (report.overallPerformance.totalQuestions !== undefined) {
+      createData.totalQuestions = report.overallPerformance.totalQuestions;
+    }
+    if (report.overallPerformance.attemptedQuestions !== undefined) {
+      createData.attemptedQuestions =
+        report.overallPerformance.attemptedQuestions;
+    }
+    if (report.overallPerformance.correctAnswers !== undefined) {
+      createData.correctAnswers = report.overallPerformance.correctAnswers;
+    }
+    if (report.overallPerformance.incorrectAnswers !== undefined) {
+      createData.incorrectAnswers = report.overallPerformance.incorrectAnswers;
+    }
+    if (report.overallPerformance.unattemptedQuestions !== undefined) {
+      createData.unattemptedQuestions =
+        report.overallPerformance.unattemptedQuestions;
+    }
+    if (report.overallPerformance.maxMarks !== undefined) {
+      createData.maxMarks = report.overallPerformance.maxMarks;
+    }
+    if (report.timeManagement.totalTimeTaken !== undefined) {
+      createData.totalTimeTaken = report.timeManagement.totalTimeTaken;
+    }
+    if (report.timeManagement.averageTimePerQuestion !== undefined) {
+      createData.averageTimePerQuestion =
+        report.timeManagement.averageTimePerQuestion;
+    }
+
+    const savedReport = await db.analysisReport.create({
+      data: createData,
       include: {
         examAttempt: {
           select: {
@@ -164,6 +175,58 @@ export async function POST(
     console.error("Error generating report:", error);
     return errorResponse("Internal server error", 500, error);
   }
+}
+
+// Define interfaces for the report structure with index signatures
+interface TopicPerformance {
+  topic: string;
+  accuracy: number;
+  questions: number;
+  correct: number;
+  [key: string]: unknown; // Add index signature for JSON compatibility
+}
+
+interface DifficultyPerformance {
+  difficulty: string;
+  accuracy: number;
+  questions: number;
+  correct: number;
+  [key: string]: unknown; // Add index signature for JSON compatibility
+}
+
+interface OverallPerformance {
+  score: number;
+  percentile: number;
+  rank: number;
+  accuracy: number;
+  totalQuestions: number;
+  attemptedQuestions: number;
+  correctAnswers: number;
+  incorrectAnswers: number;
+  unattemptedQuestions: number;
+  maxMarks: number;
+  [key: string]: unknown; // Add index signature for JSON compatibility
+}
+
+interface TimeManagement {
+  totalTimeTaken: number;
+  averageTimePerQuestion: number;
+  [key: string]: unknown; // Add index signature for JSON compatibility
+}
+
+interface StrengthsAndWeaknesses {
+  strengths: string[];
+  weaknesses: string[];
+  [key: string]: unknown; // Add index signature for JSON compatibility
+}
+
+interface GeneratedReport {
+  overallPerformance: OverallPerformance;
+  topicWisePerformance: TopicPerformance[];
+  difficultyWisePerformance: DifficultyPerformance[];
+  timeManagement: TimeManagement;
+  strengthsAndWeaknesses: StrengthsAndWeaknesses;
+  suggestedImprovements: string[];
 }
 
 function generateReport(
@@ -216,7 +279,7 @@ function generateReport(
     attemptedQuestions: number;
     correctAnswers: number;
     incorrectAnswers: number;
-    timeTaken: number; // This is in seconds
+    timeTaken: number;
   },
   examStats: {
     id: string;
@@ -274,7 +337,7 @@ function generateReport(
     userId: string;
     examId: string;
   }
-) {
+): GeneratedReport {
   // Calculate total questions from the exam structure
   let totalQuestions = 0;
   examAttempt.exam.examSections.forEach((section) => {
@@ -312,26 +375,26 @@ function generateReport(
     difficultyPerformance[difficulty].push(isCorrect);
   });
 
-  const topicWisePerformance = Object.entries(topicPerformance).map(
-    ([topic, data]) => ({
-      topic,
-      accuracy: data.total > 0 ? (data.correct / data.total) * 100 : 0,
-      questions: data.total,
-      correct: data.correct,
-    })
-  );
+  const topicWisePerformance: TopicPerformance[] = Object.entries(
+    topicPerformance
+  ).map(([topic, data]) => ({
+    topic,
+    accuracy: data.total > 0 ? (data.correct / data.total) * 100 : 0,
+    questions: data.total,
+    correct: data.correct,
+  }));
 
-  const difficultyWisePerformance = Object.entries(difficultyPerformance).map(
-    ([difficulty, answers]) => ({
-      difficulty,
-      accuracy:
-        answers.length > 0
-          ? (answers.filter(Boolean).length / answers.length) * 100
-          : 0,
-      questions: answers.length,
-      correct: answers.filter(Boolean).length,
-    })
-  );
+  const difficultyWisePerformance: DifficultyPerformance[] = Object.entries(
+    difficultyPerformance
+  ).map(([difficulty, answers]) => ({
+    difficulty,
+    accuracy:
+      answers.length > 0
+        ? (answers.filter(Boolean).length / answers.length) * 100
+        : 0,
+    questions: answers.length,
+    correct: answers.filter(Boolean).length,
+  }));
 
   const strengths = topicWisePerformance
     .filter((topic) => topic.accuracy >= 70)

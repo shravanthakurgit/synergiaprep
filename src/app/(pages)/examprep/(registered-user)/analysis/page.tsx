@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   BarChart,
   Bar,
@@ -92,6 +92,24 @@ interface StrengthsAndWeaknesses {
   weaknesses: string[];
 }
 
+interface DifficultyTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    value: number;
+    dataKey: string;
+  }>;
+  label?: string;
+}
+
+interface RenderTickProps {
+  x: number;
+  y: number;
+  payload: {
+    value: string;
+  };
+}
+
+// Change this line in the ReportData interface:
 interface ReportData {
   id: string;
   examAttemptId: string;
@@ -100,7 +118,7 @@ interface ReportData {
   difficultyWisePerformance: DifficultyPerformance[];
   timeManagement: TimeManagement;
   strengthsAndWeaknesses: StrengthsAndWeaknesses;
-  suggestedImprovements: any[];
+  suggestedImprovements: string[]; // Changed from any[] to string[]
   createdAt: string;
   updatedAt: string;
 }
@@ -110,6 +128,21 @@ interface OverallStats {
   avg_score: number;
   avg_attempted_questions: number;
   avg_accuracy: number;
+}
+
+// Add this interface at the top of the file (with other interfaces)
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    name: string;
+    value: number;
+    payload: {
+      name: string;
+      value: number;
+      color: string;
+    };
+  }>;
+  label?: string;
 }
 
 interface StatItemProps {
@@ -149,7 +182,7 @@ const TestAnalysisDashboard: React.FC = () => {
     return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
-  const fetchSubmissions = async (userId: string) => {
+  const fetchSubmissions = useCallback(async (userId: string) => {
     try {
       setError(null);
       const url = new URL("/api/v1/user-submissions", window.location.href);
@@ -166,7 +199,7 @@ const TestAnalysisDashboard: React.FC = () => {
 
       const data = await response.json();
 
-      // ADD THIS LINE: Reverse the array to show newest first
+      // Reverse the array to show newest first
       const reversedSubmissions = data.data ? [...data.data].reverse() : [];
 
       setSubmissions(reversedSubmissions);
@@ -183,7 +216,16 @@ const TestAnalysisDashboard: React.FC = () => {
       console.error("Error fetching submissions:", error);
       setError("Failed to load submissions. Please try again.");
     }
-  };
+  }, []);
+
+  // Then add fetchSubmissions to the dependency array
+  useEffect(() => {
+    const userId = session?.user?.id;
+    if (userId) {
+      fetchSubmissions(userId);
+      fetchOverallStats(userId);
+    }
+  }, [session?.user?.id, fetchSubmissions]); // Add fetchSubmissions here
 
   const fetchOverallStats = async (userId: string) => {
     try {
@@ -370,9 +412,10 @@ const TestAnalysisDashboard: React.FC = () => {
       );
     }
 
-    const CustomTooltip = ({ active, payload }: any) => {
+    // Then update the CustomTooltip function
+    const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
       if (active && payload && payload.length) {
-        const data = payload[0];
+        const data = payload[0].payload;
         return (
           <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
             <p className="font-semibold">{data.name}</p>
@@ -472,7 +515,8 @@ const TestAnalysisDashboard: React.FC = () => {
       (a, b) => b.accuracy - a.accuracy
     );
 
-    const renderTick = (props: any) => {
+    // Update the renderTick function
+    const renderTick = (props: RenderTickProps) => {
       const { x, y, payload } = props;
       const topic: string = payload.value;
 
@@ -574,7 +618,11 @@ const TestAnalysisDashboard: React.FC = () => {
       color: COLORS[index % COLORS.length],
     }));
 
-    const CustomTooltip = ({ active, payload, label }: any) => {
+    const CustomTooltip = ({
+      active,
+      payload,
+      label,
+    }: DifficultyTooltipProps) => {
       if (active && payload && payload.length) {
         return (
           <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
