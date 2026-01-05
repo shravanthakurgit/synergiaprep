@@ -388,12 +388,31 @@ model AnalysisReport {
   id                        String      @id @default(cuid())
   examAttemptId             String      @unique
   examAttempt               ExamAttempt @relation(fields: [examAttemptId], references: [id], onDelete: Cascade)
+  
+  // NEW: Add structured fields for easier querying
+  score                     Float?
+  percentile                Float?
+  rank                      Int?
+  accuracy                  Float?
+  totalQuestions            Int?
+  attemptedQuestions        Int?
+  correctAnswers            Int?
+  incorrectAnswers          Int?
+  unattemptedQuestions      Int?
+  maxMarks                  Int?        @default(100)
+  totalTimeTaken            Int?        // in seconds
+  averageTimePerQuestion    Float?
+  
+  // Keep existing JSON fields for backward compatibility
   overallPerformance        Json?
   topicWisePerformance      Json?
   difficultyWisePerformance Json?
   timeManagement            Json?
   strengthsAndWeaknesses    Json?
-  suggestedImprovements     String[]
+  
+  // Change this from String[] to Json to match our data structure
+  suggestedImprovements     Json?       // Changed from String[]
+  
   createdAt                 DateTime    @default(now())
   updatedAt                 DateTime    @updatedAt
 }
