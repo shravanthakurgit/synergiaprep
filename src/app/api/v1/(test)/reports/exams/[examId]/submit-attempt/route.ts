@@ -1,92 +1,126 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { Prisma } from "@prisma/client"
+import { Prisma } from "@prisma/client";
 import { errorResponse, successResponse } from "@/lib/utils/api-responses";
-import { SubmitAttemptInputValidationSchema } from "@/lib/utils/model-validation-schema";
 import { checkAuthUser } from "@/lib/utils/auth-check-in-exam-api";
 
-export async function POST(request: Request, { params }: { params: Promise<{ examId: string }> }) {
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ examId: string }> }
+) {
+  const authResponse = await checkAuthUser();
+  if (authResponse) return authResponse;
 
-    const authResponse = await checkAuthUser();
-    if(authResponse) return authResponse;
+  try {
+    const { examId } = await params;
+    const { userId, userSubmissionId, timeTaken } = await request.json();
 
-    try {
-        const { examId } = await params;
-        const body = await request.json();
-        
-        const validation = SubmitAttemptInputValidationSchema.safeParse(body);
-        
-        if (!validation.success) {
-            return errorResponse("Invalid Input", 400, validation.error);
-        }
+    if (!userId || !userSubmissionId) {
+      return errorResponse("Invalid input", 400);
+    }
 
-        const {userId,userSubmissionId, score, accuracy, attemptedQuestions, correctAnswers, incorrectAnswers, timeTaken} = validation.data;
+    // Prevent duplicate submission
+    const existing = await db.examAttempt.findUnique({
+      where: { userSubmissionId },
+    });
+    if (existing) {
+      return errorResponse("Attempt already submitted", 409);
+    }
 
-        const existingExamAttempt = await db.examAttempt.findFirst({
-            where : {
-                userSubmissionId : userSubmissionId
-            }
-        })
-
-        if(existingExamAttempt){
-            return errorResponse("attempt already submitted",409);
-        }
-
-        const result = await db.$transaction(async (db) => {
-
-            const examAttempt = await db.examAttempt.create({
-                data: {
-                    user: {
-                        connect: {
-                            id: userId
-                        }
-                    },
-                    exam: {
-                        connect: {
-                            id: examId
-                        }
-                    },
-                    userSubmission : {
-                        connect : {
-                            id : userSubmissionId
-                        }
-                    },
-                    score: score,
-                    accuracy: accuracy,
-                    attemptedQuestions: attemptedQuestions,
-                    correctAnswers: correctAnswers,
-                    incorrectAnswers: incorrectAnswers,
-                    timeTaken: timeTaken
-                    
-                },
-                include: {
-                    analysisReport: true
-                }
-            });
-
-
-            const rankQuery = getRankQuery(examId);
-            const rankedAttempts = await db.$queryRaw(rankQuery)
-
-            const statsQuery = getStatsQuery(examId);
-            await db.$executeRaw(statsQuery);
-
-            return db.examAttempt.findUnique({
-                where: { id: examAttempt.id },
-                include: { analysisReport: true },
-            });
+    // Fetch submission with answers + correct options
+    const submission = await db.userSubmission.findUnique({
+      where: { id: userSubmissionId },
+      include: {
+        userAnswerPerQuestions: {
+          include: {
+            chosenOptions: true,
+            question: {
+              include: {
+                options: true, // contains isCorrect
+              },
+            },
+          },
         },
-        {
-            timeout : 30000
+      },
+    });
+
+    if (!submission) {
+      return errorResponse("Submission not found", 404);
+    }
+
+    let attemptedQuestions = 0;
+    let correctAnswers = 0;
+    let incorrectAnswers = 0;
+
+    for (const answer of submission.userAnswerPerQuestions) {
+      if (!answer.isAttempted) continue;
+
+      attemptedQuestions++;
+
+      const correctOptionIds = answer.question.options
+        .filter(o => o.isCorrect)
+        .map(o => o.id)
+        .sort();
+
+      const userOptionIds = answer.chosenOptions
+        .map(o => o.optionId)
+        .sort();
+
+      const isCorrect =
+        correctOptionIds.length === userOptionIds.length &&
+        correctOptionIds.every((id, idx) => id === userOptionIds[idx]);
+
+      if (isCorrect) {
+        correctAnswers++;
+      } else {
+        incorrectAnswers++;
+      }
+    }
+
+    const accuracy =
+      attemptedQuestions === 0
+        ? 0
+        : Number(((correctAnswers / attemptedQuestions) * 100).toFixed(2));
+
+    // scoring logic (adjust later if section-wise)
+    const score = correctAnswers;
+
+    // Transaction
+    const result = await db.$transaction(
+      async (db) => {
+        const attempt = await db.examAttempt.create({
+          data: {
+            userId,
+            examId,
+            userSubmissionId,
+            score,
+            accuracy,
+            attemptedQuestions,
+            correctAnswers,
+            incorrectAnswers,
+            timeTaken,
+          },
         });
 
-    
-        return successResponse(result,"attempt submitted successfully",200);
-    } catch (error) {
-        return errorResponse("Internal server error",500,error);
-    }
+        await db.$queryRaw(getRankQuery(examId));
+        await db.$executeRaw(getStatsQuery(examId));
+
+        return db.examAttempt.findUnique({
+          where: { id: attempt.id },
+          include: { analysisReport: true },
+        });
+      },
+      { timeout: 30000 }
+    );
+
+    return successResponse(result, "Attempt submitted successfully", 200);
+  } catch (error) {
+    console.error(error);
+    return errorResponse("Internal server error", 500, error);
+  }
 }
+
 
 
 function getRankQuery(examId : string) : Prisma.Sql {
