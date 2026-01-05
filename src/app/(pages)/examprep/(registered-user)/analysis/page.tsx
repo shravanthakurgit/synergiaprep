@@ -786,7 +786,9 @@ const TestAnalysisDashboard: React.FC = () => {
               }
               trend="neutral"
             />
-            <StatItem
+
+
+            {/* <StatItem
               label="Avg. Accuracy"
               value={`${parseFloat((overallStats.avg_accuracy * 100).toFixed(2))}%`}
               icon={
@@ -797,7 +799,9 @@ const TestAnalysisDashboard: React.FC = () => {
               }
               trend="up"
               trendValue="+1.2%"
-            />
+            /> */}
+
+
           </div>
         </div>
 
@@ -978,28 +982,28 @@ const TestAnalysisDashboard: React.FC = () => {
                             ),
                             bgColor: "bg-blue-50 dark:bg-blue-900/20",
                           },
-                          {
-                            label: "Rank",
-                            value: `#${reportData.overallPerformance.rank}`,
-                            icon: (
-                              <Trophy
-                                className="text-yellow-600 dark:text-yellow-400"
-                                size={isMobile ? 16 : 20}
-                              />
-                            ),
-                            bgColor: "bg-yellow-50 dark:bg-yellow-900/20",
-                          },
-                          {
-                            label: "Percentile",
-                            value: `${reportData.overallPerformance.percentile.toFixed(1)}%`,
-                            icon: (
-                              <Award
-                                className="text-purple-600 dark:text-purple-400"
-                                size={isMobile ? 16 : 20}
-                              />
-                            ),
-                            bgColor: "bg-purple-50 dark:bg-purple-900/20",
-                          },
+                          // {
+                          //   label: "Rank",
+                          //   value: `#${reportData.overallPerformance.rank}`,
+                          //   icon: (
+                          //     <Trophy
+                          //       className="text-yellow-600 dark:text-yellow-400"
+                          //       size={isMobile ? 16 : 20}
+                          //     />
+                          //   ),
+                          //   bgColor: "bg-yellow-50 dark:bg-yellow-900/20",
+                          // },
+                          // {
+                          //   label: "Percentile",
+                          //   value: `${reportData.overallPerformance.percentile.toFixed(1)}%`,
+                          //   icon: (
+                          //     <Award
+                          //       className="text-purple-600 dark:text-purple-400"
+                          //       size={isMobile ? 16 : 20}
+                          //     />
+                          //   ),
+                          //   bgColor: "bg-purple-50 dark:bg-purple-900/20",
+                          // },
                         ].map((item, index) => (
                           <div
                             key={index}
