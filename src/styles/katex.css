@@ -1,0 +1,25 @@
+/* styles/katex.css */
+.katex-render {
+  font-size: 1.1em;
+  line-height: 1.5;
+}
+
+.katex-render .katex {
+  font-size: 1.1em !important;
+  line-height: 1.2 !important;
+}
+
+.katex-render .katex-display {
+  margin: 0.5em 0 !important;
+  overflow: auto hidden !important;
+}
+
+/* Fix for inline math alignment */
+.katex-render .katex-html {
+  line-height: 1.2;
+}
+
+/* Ensure proper spacing */
+.katex-render > span {
+  display: inline;
+}

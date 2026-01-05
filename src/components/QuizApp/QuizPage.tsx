@@ -22,7 +22,8 @@ import {
 } from "lucide-react";
 import QuestionPanel from "./QuestionPanel";
 import { Exam, OptionSelection } from "@/types/examTypes";
-import { MathJax, MathJaxContext } from "better-react-mathjax";
+import 'katex/dist/katex.min.css';
+import { InlineMath, BlockMath } from 'react-katex';
 import Image from "next/image";
 import StudyTracker from "../StudyTracker";
 
@@ -153,6 +154,48 @@ const Numpad: React.FC<{
   );
 };
 
+// Helper function to render text with LaTeX
+const renderTextWithLatex = (text: string) => {
+  if (!text) return null;
+  
+  // Split the text by LaTeX expressions
+  const parts = text.split(/(\$\$?[^$]+\$\$?)/);
+  
+  return parts.map((part, index) => {
+    // Check if it's a LaTeX expression
+    if (part.startsWith('$') && part.endsWith('$')) {
+      const isBlock = part.startsWith('$$') && part.endsWith('$$');
+      const latexContent = part.slice(isBlock ? 2 : 1, isBlock ? -2 : -1);
+      
+      try {
+        if (isBlock) {
+          return <BlockMath key={index} math={latexContent} />;
+        } else {
+          return <InlineMath key={index} math={latexContent} />;
+        }
+      } catch (error) {
+        console.warn('Katex rendering error:', error);
+        return <span key={index} className="text-red-500">{part}</span>;
+      }
+    }
+    return <span key={index}>{part}</span>;
+  });
+};
+
+// Helper function to clean LaTeX expressions
+const cleanLatexText = (text: string) => {
+  if (!text) return text;
+  
+  // Fix common LaTeX issues
+  let cleaned = text
+    // Ensure proper spacing
+    .replace(/\\cdot/g, '\\cdot ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  
+  return cleaned;
+};
+
 const QuizPage: React.FC<QuizPageProps> = ({
   Exam,
   currentQuestion,
@@ -190,56 +233,60 @@ const QuizPage: React.FC<QuizPageProps> = ({
 
   return (
     <StudyTracker>
-    <div className="bg-white">
-      <div className="max-w-screen-xl mx-auto px-4 flex">
-        {/* Main content area - fixed at 75% on large screens */}
-        <div className="w-full lg:w-3/4 pr-0 lg:pr-6 border-r-2">
-          <Card className="border-0 rounded-xl shadow-none overflow-hidden">
-            <CardContent className="p-4 md:p-6">
-              <div className="flex justify-between items-center mb-6">
-                <div>
-                  <span className="inline-block bg-indigo-100 text-indigo-800 text-sm font-medium px-3 py-1 rounded-full">
-                    Section: {currentSectionData.name}
-                  </span>
-                  <h2 className="text-xl font-bold mt-2">
-                    Question {currentQuestion[1] + 1} of{" "}
-                    {currentSectionData.questions.length}
-                  </h2>
+      <div className="bg-white">
+        <div className="max-w-screen-xl mx-auto px-4 flex">
+          {/* Main content area - fixed at 75% on large screens */}
+          <div className="w-full lg:w-3/4 pr-0 lg:pr-6 border-r-2">
+            <Card className="border-0 rounded-xl shadow-none overflow-hidden">
+              <CardContent className="p-4 md:p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <span className="inline-block bg-indigo-100 text-indigo-800 text-sm font-medium px-3 py-1 rounded-full">
+                      Section: {currentSectionData.name}
+                    </span>
+                    <h2 className="text-xl font-bold mt-2">
+                      Question {currentQuestion[1] + 1} of{" "}
+                      {currentSectionData.questions.length}
+                    </h2>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Sheet>
+                      <SheetTrigger asChild>
+                        <Button variant="outline" size="sm" className="lg:hidden">
+                          <Menu className="h-5 w-5 mr-2" />
+                          Questions
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent side="right" className="w-80">
+                        <SheetHeader>
+                          <SheetTitle>Question Panel</SheetTitle>
+                          <SheetDescription>
+                            Navigate through questions using this panel.
+                          </SheetDescription>
+                        </SheetHeader>
+                        <div className="mt-4">
+                          <QuestionPanel
+                            Exam={Exam}
+                            currentQuestion={currentQuestion}
+                            setCurrentQuestion={setCurrentQuestion}
+                            visitedQuestions={visitedQuestions}
+                            setVisitedQuestions={setVisitedQuestions}
+                            getQuestionStatus={getQuestionStatus}
+                          />
+                        </div>
+                      </SheetContent>
+                    </Sheet>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <Button variant="outline" size="sm" className="lg:hidden">
-                        <Menu className="h-5 w-5 mr-2" />
-                        Questions
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent side="right" className="w-80">
-                      <SheetHeader>
-                        <SheetTitle>Question Panel</SheetTitle>
-                        <SheetDescription>
-                          Navigate through questions using this panel.
-                        </SheetDescription>
-                      </SheetHeader>
-                      <div className="mt-4">
-                        <QuestionPanel
-                          Exam={Exam}
-                          currentQuestion={currentQuestion}
-                          setCurrentQuestion={setCurrentQuestion}
-                          visitedQuestions={visitedQuestions}
-                          setVisitedQuestions={setVisitedQuestions}
-                          getQuestionStatus={getQuestionStatus}
-                        />
-                      </div>
-                    </SheetContent>
-                  </Sheet>
-                </div>
-              </div>
-              <MathJaxContext>
                 <div className="space-y-6">
+                  {/* Question Text with LaTeX */}
                   <div className="p-4 bg-gray-50 rounded-lg text-gray-800 text-lg">
-                    <MathJax inline>{currentQuestionData.text}</MathJax>
+                    <div className="katex-render">
+                      {renderTextWithLatex(currentQuestionData.text)}
+                    </div>
+                    
                     {currentQuestionData.imageUrl && (
                       <div className="mt-4 relative group">
                         <div className="relative w-full max-w-md mx-auto">
@@ -289,7 +336,9 @@ const QuizPage: React.FC<QuizPageProps> = ({
                             <span className="inline-flex items-center justify-center w-6 h-6 mr-3 rounded-full border border-current">
                               {String.fromCharCode(65 + index)}
                             </span>
-                            <MathJax inline>{option.text}</MathJax>
+                            <span className="katex-render">
+                              {renderTextWithLatex(option.text)}
+                            </span>
                           </div>
                           {option.imageUrl && (
                             <div className="pl-9 pr-4">
@@ -315,103 +364,102 @@ const QuizPage: React.FC<QuizPageProps> = ({
                     </div>
                   )}
                 </div>
-              </MathJaxContext>
 
-              <div className="mt-8 border-t border-gray-200 pt-6">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <Button
-                    variant="default"
-                    className="bg-green-600 hover:bg-green-700 gap-2"
-                    onClick={handleSaveAndNext}
-                  >
-                    <Save size={16} />
-                    Save & Next
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="text-red-600 hover:text-red-600 border-red-200 hover:bg-red-50 gap-2"
-                    onClick={handleClearAnswer}
-                  >
-                    <X size={16} />
-                    Clear
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="text-amber-600 hover:text-amber-600 border-amber-200 hover:bg-amber-50 gap-2"
-                    onClick={handleMarkForReview}
-                  >
-                    <Flag size={16} />
-                    Review
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="text-purple-600 hover:text-purple-600 border-purple-200 hover:bg-purple-50 gap-2"
-                    onClick={handleMarkForReview}
-                  >
-                    <CheckCircle size={16} />
-                    Mark & Next
-                  </Button>
-                </div>
-
-                <div className="mt-6 flex justify-between">
-                  <div className="flex gap-2">
+                <div className="mt-8 border-t border-gray-200 pt-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <Button
-                      variant="outline"
-                      className="gap-2"
-                      onClick={handlePrevQuestion}
+                      variant="default"
+                      className="bg-green-600 hover:bg-green-700 gap-2"
+                      onClick={handleSaveAndNext}
                     >
-                      <ChevronLeft size={16} /> Prev
+                      <Save size={16} />
+                      Save & Next
                     </Button>
                     <Button
                       variant="outline"
-                      className="gap-2"
-                      onClick={handleNextQuestion}
+                      className="text-red-600 hover:text-red-600 border-red-200 hover:bg-red-50 gap-2"
+                      onClick={handleClearAnswer}
                     >
-                      Next <ChevronRight size={16} />
+                      <X size={16} />
+                      Clear
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="text-amber-600 hover:text-amber-600 border-amber-200 hover:bg-amber-50 gap-2"
+                      onClick={handleMarkForReview}
+                    >
+                      <Flag size={16} />
+                      Review
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="text-purple-600 hover:text-purple-600 border-purple-200 hover:bg-purple-50 gap-2"
+                      onClick={handleMarkForReview}
+                    >
+                      <CheckCircle size={16} />
+                      Mark & Next
                     </Button>
                   </div>
 
-                  <Button
-                    variant="default"
-                    className="bg-indigo-600 hover:bg-indigo-700"
-                    onClick={() => setCurrentStep("summary")}
-                  >
-                    Submit
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                  <div className="mt-6 flex justify-between">
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        className="gap-2"
+                        onClick={handlePrevQuestion}
+                      >
+                        <ChevronLeft size={16} /> Prev
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="gap-2"
+                        onClick={handleNextQuestion}
+                      >
+                        Next <ChevronRight size={16} />
+                      </Button>
+                    </div>
 
-        {/* Fixed width sidebar - always 25% on large screens */}
-        <div className="hidden lg:block w-1/4">
-          <div className="bg-white p-5 rounded-xl border-0 w-full">
-            <h3 className="text-lg font-bold mb-4 text-gray-800">
-              Question Panel
-            </h3>
-            <QuestionPanel
-              Exam={Exam}
-              currentQuestion={currentQuestion}
-              setCurrentQuestion={setCurrentQuestion}
-              visitedQuestions={visitedQuestions}
-              setVisitedQuestions={setVisitedQuestions}
-              getQuestionStatus={getQuestionStatus}
-            />
+                    <Button
+                      variant="default"
+                      className="bg-indigo-600 hover:bg-indigo-700"
+                      onClick={() => setCurrentStep("summary")}
+                    >
+                      Submit
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Fixed width sidebar - always 25% on large screens */}
+          <div className="hidden lg:block w-1/4">
+            <div className="bg-white p-5 rounded-xl border-0 w-full">
+              <h3 className="text-lg font-bold mb-4 text-gray-800">
+                Question Panel
+              </h3>
+              <QuestionPanel
+                Exam={Exam}
+                currentQuestion={currentQuestion}
+                setCurrentQuestion={setCurrentQuestion}
+                visitedQuestions={visitedQuestions}
+                setVisitedQuestions={setVisitedQuestions}
+                getQuestionStatus={getQuestionStatus}
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Image Modal */}
-      {modalImage && (
-        <ImageModal
-          imageUrl={modalImage.url}
-          alt={modalImage.alt}
-          isOpen={!!modalImage}
-          onClose={() => setModalImage(null)}
-        />
-      )}
-    </div>
+        {/* Image Modal */}
+        {modalImage && (
+          <ImageModal
+            imageUrl={modalImage.url}
+            alt={modalImage.alt}
+            isOpen={!!modalImage}
+            onClose={() => setModalImage(null)}
+          />
+        )}
+      </div>
     </StudyTracker>
   );
 };

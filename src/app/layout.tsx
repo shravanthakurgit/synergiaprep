@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "@/components/craft/craft.css";
+// In your app/layout.tsx or _app.tsx
+import 'katex/dist/katex.min.css';
+import '@/styles/katex.css'; // Your custom CSS
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { SessionProvider } from "next-auth/react";
