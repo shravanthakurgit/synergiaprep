@@ -126,7 +126,7 @@ export function Hero() {
       </div>
 
       {/* Joddha Section - Big Card */}
-      <div className="relative w-full px-4 sm:px-6 mt-24 sm:mt-2 md:mt-2">
+      <div className="relative w-full px-4 sm:px-6 mt-24 sm:mt-2 md:mt-2 z-10">
         <div className="max-w-7xl mx-auto">
           <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 p-6 sm:p-8 md:p-12">
