@@ -15,6 +15,16 @@ interface QuestionPanelProps {
   ) => string;
 }
 
+const sectionCategoryMap = {
+  NEET_SECTION_SINGLE_CHOICE_MCQ_TYPE_B_ATTEMPT_ANY: "CATEGORY 1",
+  NEET_SECTION_SINGLE_CHOICE_MCQ_TYPE_A_ALL_MANDATORY: "CATEGORY 2",
+  WBJEE_SECTION_SINGLE_CHOICE_MCQ_TYPE_1: "CATEGORY 1",
+  WBJEE_SECTION_SINGLE_CHOICE_MCQ_TYPE_2: "CATEGORY 2",
+  WBJEE_SECTION_MULTI_CHOICE_MCQ: "CATEGORY 3",
+} as const;
+
+type SectionCategoryKey = keyof typeof sectionCategoryMap;
+
 const QuestionPanel: React.FC<QuestionPanelProps> = ({
   Exam,
   currentQuestion,
@@ -59,8 +69,11 @@ const QuestionPanel: React.FC<QuestionPanelProps> = ({
         {Exam?.examSections.map((section, i) => (
           <div key={i} className="space-y-2">
             <h3 className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-100">
-              {section.name}
+              {section.name in sectionCategoryMap
+                ? sectionCategoryMap[section.name as SectionCategoryKey]
+                : section.name}
             </h3>
+
             <div className="grid grid-cols-4 gap-2">
               {section.questions.map((question, j) => {
                 const status = getQuestionStatus(i, j, question.id);

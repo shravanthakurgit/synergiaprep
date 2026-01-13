@@ -1,6 +1,6 @@
 // Question Form
 
-import { Edit, PlusCircle, Trash2 } from "lucide-react";
+import { Edit, PlusCircle, Trash2, Check, X } from "lucide-react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -275,9 +275,7 @@ export function QuestionForm({
     });
   };
 
-  // const [subjects, setSubjects] = useState<{ id: string; name: string }[]>([]);
   const [chapters, setChapters] = useState<{ id: string; name: string }[]>([]);
-  // const [examSubjectId, setExamSubjectId] = useState("");
 
   const handleImageUpload = async (
     e: ChangeEvent<HTMLInputElement>,
@@ -289,14 +287,10 @@ export function QuestionForm({
     const previewUrl = URL.createObjectURL(file);
     const imageData = { file, previewUrl };
 
-    // Update the form state with the local image data
     form.setValue(fieldPath as keyof QuestionFormState, imageData);
-    // console.log(fieldPath as any);
-    // console.log('form : ',form.getValues(fieldPath as any));
   };
 
   const handleDeleteImage = (fieldPath: string) => {
-    // Clean up the object URL if it exists
     const currentValue = form.getValues(fieldPath as keyof QuestionFormState);
     if (
       currentValue &&
@@ -307,7 +301,6 @@ export function QuestionForm({
       URL.revokeObjectURL(currentValue.previewUrl);
     }
 
-    // Set the field to null
     form.setValue(fieldPath as keyof QuestionFormState, null);
   };
 
@@ -325,7 +318,6 @@ export function QuestionForm({
           setQuestions((prev) => [...prev, formData]);
         }
 
-        // optional reset
         form.reset(getDefaultValues());
       } catch (error) {
         console.error("Error submitting form:", error);
@@ -338,7 +330,6 @@ export function QuestionForm({
   useEffect(() => {
     async function fetchData() {
       if (!examSubjectId) return;
-      //   console.log(examSubjectId);
       try {
         const responseTypes = await fetch(
           `/api/v1/subjects/${examSubjectId}/chapters`
@@ -352,30 +343,49 @@ export function QuestionForm({
     fetchData();
   }, [examSubjectId]);
 
+  const getDifficultyColor = (level: string) => {
+    switch (level) {
+      case "EASY":
+        return "bg-green-100 text-green-800 border-green-300";
+      case "MEDIUM":
+        return "bg-yellow-100 text-yellow-800 border-yellow-300";
+      case "HARD":
+        return "bg-red-100 text-red-800 border-red-300";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-300";
+    }
+  };
+
   return (
     <MathJaxContext config={mathJaxConfig}>
       <div className="p-4 flex w-full gap-6">
-        <Card className="w-1/2 mx-auto">
-          <CardHeader className="pb-4">
-            <CardTitle>
+        {/* Left Side - Question Form */}
+        <Card className="w-1/2 mx-auto border-2 border-blue-100 shadow-lg">
+          <CardHeader className="pb-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
+            <CardTitle className="text-2xl font-bold text-blue-800 flex items-center gap-2">
+              <div className="h-8 w-2 bg-blue-600 rounded-full"></div>
               Create{" "}
-              {questionType.charAt(0) + questionType.slice(1).toLowerCase()}{" "}
+              {questionType.charAt(0) +
+                questionType.slice(1).toLowerCase()}{" "}
               Question
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
+                className="space-y-6"
               >
+                {/* Topic and Difficulty Row */}
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="chapterId"
                     render={({ field }) => (
                       <FormItem className="flex-1">
-                        <FormLabel>Topic Name</FormLabel>
+                        <FormLabel className="font-semibold text-gray-700">
+                          Topic Name
+                        </FormLabel>
                         <Select
                           onValueChange={(value) => {
                             field.onChange(value);
@@ -383,7 +393,7 @@ export function QuestionForm({
                           value={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="border-2 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                               <SelectValue placeholder="Select Topic" />
                             </SelectTrigger>
                           </FormControl>
@@ -405,7 +415,9 @@ export function QuestionForm({
                     name="difficultyLevel"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Difficulty</FormLabel>
+                        <FormLabel className="font-semibold text-gray-700">
+                          Difficulty
+                        </FormLabel>
                         <FormControl>
                           <RadioGroup
                             onValueChange={field.onChange}
@@ -413,16 +425,55 @@ export function QuestionForm({
                             className="flex gap-2"
                           >
                             <div className="flex items-center gap-1">
-                              <RadioGroupItem value="EASY" id="easy" />
-                              <Label htmlFor="easy">Easy</Label>
+                              <div
+                                className={`px-3 py-2 rounded-lg border-2 ${getDifficultyColor("EASY")} ${field.value === "EASY" ? "ring-2 ring-green-500" : ""}`}
+                              >
+                                <RadioGroupItem
+                                  value="EASY"
+                                  id="easy"
+                                  className="mr-2"
+                                />
+                                <Label
+                                  htmlFor="easy"
+                                  className="cursor-pointer font-medium"
+                                >
+                                  Easy
+                                </Label>
+                              </div>
                             </div>
                             <div className="flex items-center gap-1">
-                              <RadioGroupItem value="MEDIUM" id="medium" />
-                              <Label htmlFor="medium">Medium</Label>
+                              <div
+                                className={`px-3 py-2 rounded-lg border-2 ${getDifficultyColor("MEDIUM")} ${field.value === "MEDIUM" ? "ring-2 ring-yellow-500" : ""}`}
+                              >
+                                <RadioGroupItem
+                                  value="MEDIUM"
+                                  id="medium"
+                                  className="mr-2"
+                                />
+                                <Label
+                                  htmlFor="medium"
+                                  className="cursor-pointer font-medium"
+                                >
+                                  Medium
+                                </Label>
+                              </div>
                             </div>
                             <div className="flex items-center gap-1">
-                              <RadioGroupItem value="HARD" id="hard" />
-                              <Label htmlFor="hard">Hard</Label>
+                              <div
+                                className={`px-3 py-2 rounded-lg border-2 ${getDifficultyColor("HARD")} ${field.value === "HARD" ? "ring-2 ring-red-500" : ""}`}
+                              >
+                                <RadioGroupItem
+                                  value="HARD"
+                                  id="hard"
+                                  className="mr-2"
+                                />
+                                <Label
+                                  htmlFor="hard"
+                                  className="cursor-pointer font-medium"
+                                >
+                                  Hard
+                                </Label>
+                              </div>
                             </div>
                           </RadioGroup>
                         </FormControl>
@@ -431,85 +482,109 @@ export function QuestionForm({
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <FormField
-                    control={form.control}
-                    name="text"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Textarea
-                            onClick={() => openLatexEditor("text")}
-                            {...field}
-                            placeholder="Question Text"
-                            className="min-h-20"
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="imageFile"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Upload Image</FormLabel>
-                        <FormControl>
-                          <div className="flex flex-col gap-2">
-                            <Input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) =>
-                                handleImageUpload(e, "imageFile")
-                              }
-                              className="w-full"
+                {/* Question Text Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="h-4 w-1 bg-purple-600 rounded-full"></div>
+                    <Label className="font-semibold text-lg text-gray-800">
+                      Question
+                    </Label>
+                  </div>
+                  <div className="border-2 border-purple-100 rounded-xl p-4 bg-purple-50/50">
+                    <FormField
+                      control={form.control}
+                      name="text"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Textarea
+                              onClick={() => openLatexEditor("text")}
+                              {...field}
+                              placeholder="Enter your question text here..."
+                              className="min-h-32 border-2 border-purple-200 focus:border-purple-500 focus:ring-purple-500 rounded-lg"
                             />
-                            <p className="text-sm text-gray-500">
-                              {field.value?.previewUrl
-                                ? field.value.previewUrl
-                                : "No image uploaded"}
-                            </p>
-                            {field.value?.previewUrl && (
-                              <div className="mt-2 flex items-center gap-2">
-                                <Image
-                                  src={field.value.previewUrl}
-                                  alt="Uploaded preview"
-                                  width={200}
-                                  height={200}
-                                  style={{ width: "auto", height: "auto" }}
-                                  className="rounded-md border"
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="imageFile"
+                      render={({ field }) => (
+                        <FormItem className="mt-4">
+                          <FormLabel className="text-gray-600">
+                            Upload Question Image (Optional)
+                          </FormLabel>
+                          <FormControl>
+                            <div className="flex flex-col gap-2">
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) =>
+                                    handleImageUpload(e, "imageFile")
+                                  }
+                                  className="w-full border-2 border-gray-300 rounded-lg"
                                 />
-                                <Button
-                                  type="button"
-                                  variant="destructive"
-                                  size={"icon"}
-                                  onClick={() => {
-                                    handleDeleteImage("imageFile");
-                                  }}
-                                  className="h-8 w-8"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
                               </div>
-                            )}
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                              {field.value?.previewUrl && (
+                                <div className="mt-3 p-3 border-2 border-green-200 rounded-lg bg-green-50">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="text-sm font-medium text-green-700">
+                                      Uploaded Image Preview:
+                                    </span>
+                                    <Button
+                                      type="button"
+                                      variant="destructive"
+                                      size={"icon"}
+                                      onClick={() => {
+                                        handleDeleteImage("imageFile");
+                                      }}
+                                      className="h-8 w-8"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                  <Image
+                                    src={field.value.previewUrl}
+                                    alt="Uploaded preview"
+                                    width={300}
+                                    height={200}
+                                    style={{
+                                      width: "auto",
+                                      height: "auto",
+                                      maxHeight: "200px",
+                                    }}
+                                    className="rounded-md border-2 border-green-300 mx-auto"
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
 
+                {/* Options Section (for SINGLE and MULTI) */}
                 {questionType !== "INTEGER" && (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <Label className="text-sm">
-                        Options{" "}
-                        {questionType === "MULTI"
-                          ? "(Multiple correct)"
-                          : "(Single correct)"}
-                      </Label>
+                      <div className="flex items-center gap-2">
+                        <div className="h-4 w-1 bg-blue-600 rounded-full"></div>
+                        <Label className="font-semibold text-lg text-gray-800">
+                          Options{" "}
+                          <span className="text-sm font-normal text-blue-600">
+                            {questionType === "MULTI"
+                              ? "(Select multiple correct answers)"
+                              : "(Select one correct answer)"}
+                          </span>
+                        </Label>
+                      </div>
                       <Button
                         type="button"
                         variant="outline"
@@ -520,37 +595,48 @@ export function QuestionForm({
                             imageFile: null,
                           })
                         }
-                        className="h-8 px-2"
+                        className="h-9 px-3 border-2 border-blue-300 text-blue-700 hover:bg-blue-50"
                       >
-                        <PlusCircle className="h-4 w-4 mr-1" />
-                        Add
+                        <PlusCircle className="h-4 w-4 mr-2" />
+                        Add Option
                       </Button>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       {fields.map((field, index) => (
-                        <Card key={field.id} className="p-3">
-                          <div className="grid grid-cols-[1fr,auto] gap-2">
-                            <div className="space-y-2">
-                              <FormField
-                                control={form.control}
-                                name={`options.${index}.text`}
-                                render={({ field }) => (
-                                  <Input
-                                    {...field}
-                                    placeholder="Option text"
-                                    onClick={() =>
-                                      openLatexEditor(`options.${index}.text`)
-                                    }
-                                  />
-                                )}
-                              />
+                        <Card
+                          key={field.id}
+                          className={`p-4 border-2 ${form.watch(`options.${index}.isCorrect`) ? "border-green-400 bg-green-50/50" : "border-gray-200"} rounded-xl transition-all duration-200 hover:shadow-md`}
+                        >
+                          <div className="grid grid-cols-[1fr,auto] gap-3">
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-gray-700 min-w-6">
+                                  {String.fromCharCode(65 + index)}.
+                                </span>
+                                <FormField
+                                  control={form.control}
+                                  name={`options.${index}.text`}
+                                  render={({ field }) => (
+                                    <Input
+                                      {...field}
+                                      placeholder={`Option ${String.fromCharCode(65 + index)}`}
+                                      onClick={() =>
+                                        openLatexEditor(`options.${index}.text`)
+                                      }
+                                      className="border-2 border-gray-300 focus:border-blue-500"
+                                    />
+                                  )}
+                                />
+                              </div>
                               <FormField
                                 control={form.control}
                                 name={`options.${index}.imageFile`}
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Upload Image</FormLabel>
+                                    <FormLabel className="text-sm text-gray-600">
+                                      Option Image (Optional)
+                                    </FormLabel>
                                     <FormControl>
                                       <div className="flex flex-col gap-2">
                                         <Input
@@ -562,39 +648,40 @@ export function QuestionForm({
                                               `options.${index}.imageFile`
                                             )
                                           }
-                                          className="w-full"
+                                          className="w-full border-2 border-gray-300"
                                         />
-                                        <p className="text-sm text-gray-500">
-                                          {field.value?.previewUrl
-                                            ? field.value.previewUrl
-                                            : "No image uploaded"}
-                                        </p>
                                         {field.value?.previewUrl && (
-                                          <div className="mt-2 flex items-center gap-2">
+                                          <div className="mt-2 p-3 border-2 border-blue-200 rounded-lg bg-blue-50">
+                                            <div className="flex items-center justify-between mb-2">
+                                              <span className="text-sm font-medium text-blue-700">
+                                                Option Image:
+                                              </span>
+                                              <Button
+                                                type="button"
+                                                variant="destructive"
+                                                size={"icon"}
+                                                onClick={() => {
+                                                  handleDeleteImage(
+                                                    `options.${index}.imageFile`
+                                                  );
+                                                }}
+                                                className="h-8 w-8"
+                                              >
+                                                <Trash2 className="h-4 w-4" />
+                                              </Button>
+                                            </div>
                                             <Image
                                               src={field.value.previewUrl}
                                               alt="Uploaded preview"
                                               width={200}
-                                              height={200}
+                                              height={150}
                                               style={{
                                                 width: "auto",
                                                 height: "auto",
+                                                maxHeight: "150px",
                                               }}
-                                              className="rounded-md border"
+                                              className="rounded-md border-2 border-blue-300 mx-auto"
                                             />
-                                            <Button
-                                              type="button"
-                                              variant="destructive"
-                                              size={"icon"}
-                                              onClick={() => {
-                                                handleDeleteImage(
-                                                  `options.${index}.imageFile`
-                                                );
-                                              }}
-                                              className="h-8 w-8 z-10"
-                                            >
-                                              <Trash2 className="h-4 w-4" />
-                                            </Button>
                                           </div>
                                         )}
                                       </div>
@@ -604,7 +691,7 @@ export function QuestionForm({
                                 )}
                               />
                             </div>
-                            <div className="flex flex-col justify-between items-center">
+                            <div className="flex flex-col justify-start items-center gap-3">
                               <FormField
                                 control={form.control}
                                 name={`options.${index}.isCorrect`}
@@ -612,22 +699,34 @@ export function QuestionForm({
                                   <FormItem>
                                     <FormControl>
                                       {questionType === "MULTI" ? (
-                                        <input
-                                          type="checkbox"
-                                          checked={field.value}
-                                          onChange={field.onChange}
-                                          className="w-4 h-4"
-                                        />
+                                        <div className="flex items-center gap-2">
+                                          <input
+                                            type="checkbox"
+                                            checked={field.value}
+                                            onChange={field.onChange}
+                                            className="w-5 h-5 text-green-600 border-2 border-gray-400 rounded focus:ring-green-500"
+                                          />
+                                          <Label className="text-sm font-medium text-gray-700">
+                                            {field.value
+                                              ? "Correct"
+                                              : "Mark as correct"}
+                                          </Label>
+                                        </div>
                                       ) : (
-                                        <input
-                                          type="radio"
-                                          checked={field.value}
-                                          onChange={() =>
-                                            handleSingleCorrectChange(index)
-                                          }
-                                          name="correctOption"
-                                          className="w-4 h-4"
-                                        />
+                                        <div className="flex items-center gap-2">
+                                          <input
+                                            type="radio"
+                                            checked={field.value}
+                                            onChange={() =>
+                                              handleSingleCorrectChange(index)
+                                            }
+                                            name="correctOption"
+                                            className="w-5 h-5 text-blue-600 border-2 border-gray-400 focus:ring-blue-500"
+                                          />
+                                          <Label className="text-sm font-medium text-gray-700">
+                                            {field.value ? "Correct" : "Select"}
+                                          </Label>
+                                        </div>
                                       )}
                                     </FormControl>
                                   </FormItem>
@@ -639,9 +738,9 @@ export function QuestionForm({
                                 size="icon"
                                 onClick={() => remove(index)}
                                 disabled={fields.length <= 2}
-                                className="h-8 w-8"
+                                className="h-9 w-9 text-red-500 hover:text-red-700 hover:bg-red-50"
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-5 w-5" />
                               </Button>
                             </div>
                           </div>
@@ -651,123 +750,184 @@ export function QuestionForm({
                   </div>
                 )}
 
-                {/* Answer Section */}
-                <div className="space-y-2">
-                  <Label className="text-sm">
-                    Answer{" "}
-                    {questionType === "INTEGER" ? "& Solution" : "Explanation"}
-                  </Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {questionType === "INTEGER" && (
+                {/* Answer & Explanation Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="h-4 w-1 bg-green-600 rounded-full"></div>
+                    <Label className="font-semibold text-lg text-gray-800">
+                      {questionType === "INTEGER"
+                        ? "Answer & Solution"
+                        : "Answer Explanation"}
+                    </Label>
+                  </div>
+                  <div className="border-2 border-green-100 rounded-xl p-4 bg-green-50/50">
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      {questionType === "INTEGER" && (
+                        <FormField
+                          control={form.control}
+                          name="answerExplanationField.value"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-700">
+                                Numerical Answer
+                              </FormLabel>
+                              <Input
+                                {...field}
+                                placeholder="Enter numerical answer"
+                                className="border-2 border-green-300 focus:border-green-500"
+                              />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
                       <FormField
                         control={form.control}
-                        name="answerExplanationField.value"
+                        name="answerExplanationField.text"
                         render={({ field }) => (
-                          <Input {...field} placeholder="Numerical Answer" />
+                          <FormItem>
+                            <FormLabel className="text-gray-700">
+                              Answer Text
+                            </FormLabel>
+                            <Input
+                              {...field}
+                              placeholder="Enter answer text"
+                              className="border-2 border-green-300 focus:border-green-500"
+                            />
+                            <FormMessage />
+                          </FormItem>
                         )}
                       />
-                    )}
+                      {questionType === "SINGLE" && (
+                        <FormField
+                          control={form.control}
+                          name="answerExplanationField.value"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-700">
+                                Answer Value
+                              </FormLabel>
+                              <Input
+                                {...field}
+                                placeholder="Enter answer value"
+                                className="border-2 border-green-300 focus:border-green-500"
+                              />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
+                    </div>
+
                     <FormField
                       control={form.control}
-                      name="answerExplanationField.text"
+                      name="answerExplanationField.explanation"
                       render={({ field }) => (
-                        <Input {...field} placeholder="Text" />
+                        <FormItem>
+                          <FormLabel className="text-gray-700">
+                            Detailed Explanation
+                          </FormLabel>
+                          <Textarea
+                            {...field}
+                            placeholder="Enter detailed explanation here..."
+                            className="min-h-32 border-2 border-green-300 focus:border-green-500 focus:ring-green-500 rounded-lg"
+                            onClick={() => {
+                              openLatexEditor(
+                                "answerExplanationField.explanation"
+                              );
+                            }}
+                          />
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
-                    {questionType === "SINGLE" && (
-                      <FormField
-                        control={form.control}
-                        name="answerExplanationField.value"
-                        render={({ field }) => (
-                          <Input {...field} placeholder="Value" />
-                        )}
-                      />
-                    )}
-                  </div>
-                  <FormField
-                    control={form.control}
-                    name="answerExplanationField.explanation"
-                    render={({ field }) => (
-                      <Textarea
-                        {...field}
-                        placeholder="Explanation"
-                        className="min-h-20"
-                        onClick={() => {
-                          openLatexEditor("answerExplanationField.explanation");
-                        }}
-                      />
-                    )}
-                  />
 
-                  <FormField
-                    control={form.control}
-                    name="answerExplanationField.imageFile"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Solution Image</FormLabel>
-                        <FormControl>
-                          <div className="flex flex-col gap-2">
-                            <Input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) =>
-                                handleImageUpload(
-                                  e,
-                                  "answerExplanationField.imageFile"
-                                )
-                              }
-                              className="w-full"
-                            />
-                            {field.value?.previewUrl && (
-                              <div className="mt-2 flex items-center gap-2">
-                                <Image
-                                  src={field.value.previewUrl}
-                                  alt="Uploaded preview"
-                                  width={200}
-                                  height={200}
-                                  style={{ width: "auto", height: "auto" }}
-                                  className="rounded-md border"
-                                />
-                                <Button
-                                  type="button"
-                                  variant="destructive"
-                                  size={"icon"}
-                                  onClick={() => {
-                                    handleDeleteImage(
-                                      "answerExplanationField.imageFile"
-                                    );
-                                  }}
-                                  className="h-8 w-8"
-                                >
-                                  {" "}
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            )}
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={form.control}
+                      name="answerExplanationField.imageFile"
+                      render={({ field }) => (
+                        <FormItem className="mt-4">
+                          <FormLabel className="text-gray-700">
+                            Solution Image (Optional)
+                          </FormLabel>
+                          <FormControl>
+                            <div className="flex flex-col gap-2">
+                              <Input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) =>
+                                  handleImageUpload(
+                                    e,
+                                    "answerExplanationField.imageFile"
+                                  )
+                                }
+                                className="w-full border-2 border-gray-300 rounded-lg"
+                              />
+                              {field.value?.previewUrl && (
+                                <div className="mt-3 p-3 border-2 border-emerald-200 rounded-lg bg-emerald-50">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="text-sm font-medium text-emerald-700">
+                                      Solution Image Preview:
+                                    </span>
+                                    <Button
+                                      type="button"
+                                      variant="destructive"
+                                      size={"icon"}
+                                      onClick={() => {
+                                        handleDeleteImage(
+                                          "answerExplanationField.imageFile"
+                                        );
+                                      }}
+                                      className="h-8 w-8"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                  <Image
+                                    src={field.value.previewUrl}
+                                    alt="Uploaded preview"
+                                    width={300}
+                                    height={200}
+                                    style={{
+                                      width: "auto",
+                                      height: "auto",
+                                      maxHeight: "200px",
+                                    }}
+                                    className="rounded-md border-2 border-emerald-300 mx-auto"
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
 
-                <div className="flex gap-2 mt-4">
-                  <Button type="submit" className="flex-1" disabled={isSubmit}>
+                {/* Submit Buttons */}
+                <div className="flex gap-3 mt-6 pt-4 border-t-2 border-gray-200">
+                  <Button
+                    type="submit"
+                    className={`flex-1 h-12 text-lg font-semibold ${editingIndex !== null ? "bg-amber-600 hover:bg-amber-700" : "bg-blue-600 hover:bg-blue-700"}`}
+                    disabled={isSubmit}
+                  >
                     {editingIndex !== null
-                      ? "Update"
+                      ? "Update Question"
                       : isSubmit
-                        ? "Adding..."
-                        : "Add"}{" "}
-                    Question
+                        ? "Adding Question..."
+                        : "Add Question"}
                   </Button>
                   {editingIndex !== null && (
                     <Button
                       type="button"
-                      variant="destructive"
+                      variant="outline"
                       onClick={handleCancel}
+                      className="h-12 px-6 border-2 border-red-300 text-red-600 hover:bg-red-50"
                     >
-                      Cancel
+                      <X className="h-5 w-5 mr-2" />
+                      Cancel Edit
                     </Button>
                   )}
                 </div>
@@ -776,124 +936,228 @@ export function QuestionForm({
           </CardContent>
         </Card>
 
-        <Card className="w-1/2 mx-auto">
-          <CardHeader className="pb-4">
-            <CardTitle>Questions in {questionType} Choice Type</CardTitle>
+        {/* Right Side - Question List */}
+        <Card className="w-1/2 mx-auto border-2 border-orange-100 shadow-lg">
+          <CardHeader className="pb-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-t-lg">
+            <CardTitle className="text-2xl font-bold text-orange-800 flex items-center gap-2">
+              <div className="h-8 w-2 bg-orange-600 rounded-full"></div>
+              Questions in {questionType} Choice Type
+              <span className="ml-auto text-lg font-normal bg-orange-100 text-orange-800 px-3 py-1 rounded-full">
+                {questions.length}{" "}
+                {questions.length === 1 ? "question" : "questions"}
+              </span>
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto p-2">
             {questions.length === 0 ? (
-              <p>No questions added yet</p>
+              <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-xl">
+                <div className="text-gray-400 mb-2">
+                  <svg
+                    className="w-16 h-16 mx-auto"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                </div>
+                <p className="text-gray-500 text-lg">No questions added yet</p>
+                <p className="text-gray-400 text-sm mt-1">
+                  Questions will appear here once added
+                </p>
+              </div>
             ) : (
               questions.map((question, index) => (
-                <Card key={index} className="p-3">
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-start relative">
-                      <div>
-                        <h3 className="text-lg font-semibold text-wrap">
-                          Q.{index + 1}{" "}
-                          <MathJax inline dynamic>
-                            {question.text}
-                          </MathJax>
-                        </h3>
-                        {question.imageFile?.previewUrl && (
-                          <Image
-                            src={question.imageFile?.previewUrl}
-                            alt="Uploaded Image"
-                            width={400}
-                            height={300}
-                            style={{ width: "auto", height: "auto" }}
-                            className="rounded-md border"
-                          />
-                        )}
+                <Card
+                  key={index}
+                  className="p-5 border-2 border-gray-200 hover:border-blue-300 transition-all duration-200 rounded-xl shadow-sm hover:shadow-md"
+                >
+                  <div className="space-y-4">
+                    {/* Question Header with Actions */}
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div
+                            className={`px-3 py-1 rounded-full text-sm font-semibold ${getDifficultyColor(question.difficultyLevel)}`}
+                          >
+                            {question.difficultyLevel}
+                          </div>
+                          <span className="text-lg font-bold text-blue-700">
+                            Q.{index + 1}
+                          </span>
+                        </div>
+                        <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-100">
+                          <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                            <MathJax inline dynamic>
+                              {question.text || "Question text..."}
+                            </MathJax>
+                          </h3>
+                          {question.imageFile?.previewUrl && (
+                            <div className="mt-3 p-3 border-2 border-blue-200 rounded-lg bg-blue-50 inline-block">
+                              <Image
+                                src={question.imageFile?.previewUrl}
+                                alt="Question Image"
+                                width={300}
+                                height={200}
+                                style={{
+                                  width: "auto",
+                                  height: "auto",
+                                  maxHeight: "200px",
+                                }}
+                                className="rounded-md border-2 border-blue-300"
+                              />
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex gap-2 absolute right-0 top-0">
+                      <div className="flex gap-2 ml-4">
                         <Button
                           type="button"
-                          variant="ghost"
+                          variant="outline"
                           size="icon"
                           onClick={() => handleEdit(index)}
-                          className="h-8 w-8"
+                          className="h-10 w-10 border-2 border-blue-300 text-blue-600 hover:bg-blue-50"
+                          title="Edit Question"
                         >
-                          <Edit className="h-4 w-4" />
+                          <Edit className="h-5 w-5" />
                         </Button>
                         <Button
                           type="button"
-                          variant="ghost"
+                          variant="outline"
                           size="icon"
                           onClick={() => handleDelete(index)}
-                          className="h-8 w-8 text-red-500"
+                          className="h-10 w-10 border-2 border-red-300 text-red-600 hover:bg-red-50"
+                          title="Delete Question"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-5 w-5" />
                         </Button>
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {question.options?.map((option, optIndex) => (
-                        <div
-                          key={optIndex}
-                          className="flex flex-col gap-2 p-2 bg-gray-100 rounded-md"
-                        >
-                          <div className="flex items-center gap-2">
-                            <input
-                              type={
-                                questionType === "MULTI" ? "checkbox" : "radio"
-                              }
-                              checked={option.isCorrect}
-                              className="w-4 h-4 text-wrap"
-                              readOnly
-                            />
-                            <p>
+
+                    {/* Options Display */}
+                    {question.options && (
+                      <div className="space-y-2">
+                        <Label className="font-semibold text-gray-700">
+                          Options:
+                        </Label>
+                        <div className="grid grid-cols-2 gap-3">
+                          {question.options.map((option, optIndex) => (
+                            <div
+                              key={optIndex}
+                              className={`p-3 rounded-lg border-2 ${option.isCorrect ? "border-green-400 bg-green-50" : "border-gray-200 bg-gray-50"} transition-all duration-200`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div
+                                  className={`w-6 h-6 rounded-full flex items-center justify-center ${option.isCorrect ? "bg-green-100 text-green-700 border-2 border-green-400" : "bg-gray-100 text-gray-600 border-2 border-gray-300"}`}
+                                >
+                                  {String.fromCharCode(65 + optIndex)}
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-gray-800 font-medium">
+                                    <MathJax inline dynamic>
+                                      {option.text || "Option text..."}
+                                    </MathJax>
+                                  </p>
+                                </div>
+                                {option.isCorrect && (
+                                  <Check className="h-5 w-5 text-green-600" />
+                                )}
+                              </div>
+                              {option.imageFile?.previewUrl && (
+                                <div className="mt-2 ml-9">
+                                  <Image
+                                    src={option.imageFile?.previewUrl}
+                                    alt="Option Image"
+                                    width={150}
+                                    height={100}
+                                    style={{
+                                      width: "auto",
+                                      height: "auto",
+                                      maxHeight: "100px",
+                                    }}
+                                    className="rounded-md border border-gray-300"
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Answer Explanation Display */}
+                    <div className="border-t-2 border-gray-100 pt-4">
+                      <Label className="font-semibold text-gray-700 mb-2 block">
+                        Answer & Explanation:
+                      </Label>
+                      <div className="bg-emerald-50 p-4 rounded-lg border-2 border-emerald-100">
+                        {question.answerExplanationField.text && (
+                          <div className="mb-3">
+                            <span className="font-medium text-emerald-800">
+                              Text Answer:
+                            </span>
+                            <p className="text-gray-800 mt-1">
                               <MathJax inline dynamic>
-                                {option.text}
+                                {question.answerExplanationField.text}
                               </MathJax>
                             </p>
                           </div>
-                          {option.imageFile?.previewUrl && (
+                        )}
+                        {question.answerExplanationField.value && (
+                          <div className="mb-3">
+                            <span className="font-medium text-emerald-800">
+                              {questionType === "INTEGER"
+                                ? "Numerical Answer:"
+                                : "Value:"}
+                            </span>
+                            <p className="text-gray-800 font-semibold mt-1">
+                              <MathJax inline dynamic>
+                                {question.answerExplanationField.value}
+                              </MathJax>
+                            </p>
+                          </div>
+                        )}
+                        {question.answerExplanationField.explanation && (
+                          <div className="mb-3">
+                            <span className="font-medium text-emerald-800">
+                              Explanation:
+                            </span>
+                            <p className="text-gray-800 mt-1">
+                              <MathJax inline dynamic>
+                                {question.answerExplanationField.explanation}
+                              </MathJax>
+                            </p>
+                          </div>
+                        )}
+                        {question.answerExplanationField.imageFile
+                          ?.previewUrl && (
+                          <div className="mt-3">
+                            <span className="font-medium text-emerald-800 mb-2 block">
+                              Solution Image:
+                            </span>
                             <Image
-                              src={option.imageFile?.previewUrl}
-                              alt="Uploaded Image"
-                              width={200}
-                              height={200}
-                              style={{ width: "auto", height: "auto" }}
-                              className="rounded-md border"
+                              src={
+                                question.answerExplanationField.imageFile
+                                  ?.previewUrl
+                              }
+                              alt="Solution Image"
+                              width={250}
+                              height={150}
+                              style={{
+                                width: "auto",
+                                height: "auto",
+                                maxHeight: "150px",
+                              }}
+                              className="rounded-md border-2 border-emerald-300"
                             />
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                    <div>
-                      <p>
-                        <MathJax inline dynamic>
-                          {question.answerExplanationField.text}
-                        </MathJax>
-                      </p>
-                      <p>
-                        <MathJax inline dynamic>
-                          {question.answerExplanationField.value}
-                        </MathJax>
-                      </p>
-                      <p>
-                        <MathJax inline dynamic>
-                          {question.answerExplanationField.explanation}
-                        </MathJax>
-                      </p>
-                      {question.answerExplanationField.imageFile
-                        ?.previewUrl && (
-                        <div>
-                          <Image
-                            src={
-                              question.answerExplanationField.imageFile
-                                ?.previewUrl
-                            }
-                            alt="Uploaded Image"
-                            width={200}
-                            height={200}
-                            style={{ width: "auto", height: "auto" }}
-                            className="rounded-md border"
-                            unoptimized={true}
-                          />
-                        </div>
-                      )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </Card>
