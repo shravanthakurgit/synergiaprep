@@ -16,20 +16,24 @@ export const GET = async (req: NextRequest) => {
 
     const id = session.user.id;
 
-    const user = await db.user.findUnique({
-      where: {
-        id: id,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        image: true,
-        ph_no: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+ const user = await db.user.findUnique({
+  where: {
+    id: id,
+  },
+  include: {
+    enrollments: {
+      include: {
+        course: {
+          select: {
+            id: true,
+            title: true,
+            // Only select what you need
+          }
+        }
+      }
+    }
+  },
+});
 
     if (!user) {
       return errorResponse("No user found", 404);

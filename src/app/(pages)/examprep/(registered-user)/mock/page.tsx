@@ -21,6 +21,7 @@ import {
   Grid,
   Info,
   Lock,
+  LockIcon,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -41,6 +42,7 @@ import Loading from "@/components/Loading";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import DeleteExamButton from "@/components/DeleteExamButton";
+import Link from "next/link";
 
 interface pyqTest {
   id: string;
@@ -49,10 +51,14 @@ interface pyqTest {
   exam: "NEET" | "JEE" | "WBJEE";
   totalDurationInSeconds: number;
   totalQuestions: number;
+  accessType: "FREE" | "PAID",
   totalMarks: number;
+  courseId:string,
 }
 
 const Page: React.FC = () => {
+
+  
   const { data: session, status } = useSession();
   const router = useRouter();
   const [pyqTests, setpyqTests] = useState<pyqTest[]>([]);
@@ -86,16 +92,29 @@ const Page: React.FC = () => {
   }, []);
 
   // Handle test start - check if user is logged in
-  const handleStartTest = (testId: string) => {
-    if (isLoggedIn) {
-      // User is logged in, proceed to test
-      router.push(`/exam?examId=${testId}&type=pyq`);
-    } else {
-      // User is not logged in, redirect to login with callback
-      const callbackUrl = `/exam?examId=${testId}&type=pyq`;
-      router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
-    }
-  };
+const handleStartTest = (test : object) => {
+  console.log(test)
+  // 1️⃣ Not logged in → login
+  if (!isLoggedIn) {
+    const callbackUrl = `/exam?examId=${test.id}&type=mock`;
+    router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+    return;
+  }
+
+  // 2️⃣ Check subscription
+  const isSubscribed = session?.user?.enrollments?.some(
+    (e) => e.courseId === test.courseId
+  );
+
+  // 3️⃣ Not subscribed → subscribe page
+  if (!isSubscribed) {
+    router.push(`/subscribe?courseId=${test.courseId}`);
+    return;
+  }
+
+  // 4️⃣ Subscribed (FREE or PAID) → start test
+  router.push(`/exam?examId=${test.id}&type=mock`);
+};
 
   // Extract unique subjects from available tests
   const uniqueSubjects = useMemo(() => {
@@ -179,133 +198,196 @@ const Page: React.FC = () => {
     const totalChapters = test.subjects.flatMap((s) => s.chapters).length;
 
     return (
-      <div key={test.id} className="h-full">
-        <Card className="h-full hover:shadow-lg transition-all duration-300 border hover:border-emerald-200 bg-white flex flex-col">
-          <CardHeader className="pb-2">
-            <div className="flex justify-between items-start">
-              <CardTitle className="text-xl font-bold text-gray-900 line-clamp-2">
-                {test.title}
-              </CardTitle>
-              <Badge
-                variant="outline"
-                className="bg-emerald-50 text-emerald-700 border-emerald-200"
-              >
-                {test.exam}
-              </Badge>
-            </div>
-          </CardHeader>
+     <div key={test.id} className="h-full group">
+  <Card className="h-full flex flex-col relative overflow-hidden
+    bg-white/90 backdrop-blur
+    border border-gray-200
+    transition-all duration-300
+    hover:-translate-y-1 hover:shadow-xl">
 
-          <CardContent className="flex-grow">
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-lg">
-                <Clock className="h-5 w-5 text-gray-600 mb-1" />
-                <span className="text-sm font-medium text-gray-700">
-                  {formatDuration(test.totalDurationInSeconds)}
-                </span>
-              </div>
-              <div className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-lg">
-                <Target className="h-5 w-5 text-gray-600 mb-1" />
-                <span className="text-sm font-medium text-gray-700">
-                  {test.totalQuestions} Questions
-                </span>
-              </div>
-              <div className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-lg">
-                <BookOpen className="h-5 w-5 text-gray-600 mb-1" />
-                <span className="text-sm font-medium text-gray-700">
-                  {test.subjects.length} Subjects
-                </span>
-              </div>
-              <div className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-lg">
-                <Award className="h-5 w-5 text-gray-600 mb-1" />
-                <span className="text-sm font-medium text-gray-700">
-                  {test.totalMarks} Marks
-                </span>
-              </div>
-            </div>
 
-            <div className="p-3 rounded-lg bg-gray-50 mb-4">
-              <div className="flex justify-between items-center mb-2">
-                <p className="text-sm font-medium text-gray-700">
-                  Topics Covered:{" "}
-                  <span className="font-normal text-gray-500">
-                    {totalChapters} topics
-                  </span>
-                </p>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 rounded-full hover:bg-gray-200"
-                    >
-                      <Info className="h-4 w-4 text-gray-500" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80 max-h-80 overflow-y-auto p-4">
-                    <div className="font-medium mb-2 text-gray-900">
-                      Subjects & Topics
-                    </div>
-                    {test.subjects.map((subject) => (
-                      <div key={subject.name} className="mb-3">
-                        <p className="text-sm font-semibold mb-1 text-gray-700">
-                          {subject.name}
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {subject.chapters.map((chapter, index) => (
-                            <Badge
-                              key={`${chapter.name}-${index}`}
-                              variant="secondary"
-                              className="text-xs mb-1 bg-gray-100 text-gray-700"
-                            >
-                              {chapter.name}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </PopoverContent>
-                </Popover>
-              </div>
+    <CardHeader className="pb-3">
+      <div className="flex justify-between items-start gap-3">
+        <CardTitle className="text-lg font-semibold text-gray-900 leading-snug line-clamp-2">
+          {test.title}
+        </CardTitle>
 
-              <div className="flex flex-wrap gap-1">
-                {test.subjects.map((subject) => (
-                  <Badge
-                    key={subject.name}
-                    variant="secondary"
-                    className="text-xs bg-emerald-100 text-emerald-700"
-                  >
-                    {subject.name}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            {!isLoggedIn && (
-              <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 p-2 rounded-lg mb-2">
-                <Lock className="h-4 w-4" />
-                <span>Login required to attempt this mock</span>
-              </div>
-            )}
-          </CardContent>
-
-          <CardFooter className="pt-2 flex flex-col gap-2">
-            <Button
-              onClick={() => handleStartTest(test.id)}
-              className={`w-full ${isLoggedIn ? "bg-emerald-600 hover:bg-emerald-700" : "bg-amber-500 hover:bg-amber-600"}`}
-            >
-              {isLoggedIn ? "Start PYQ Test" : "Login to Start"}
-            </Button>
-            <DeleteExamButton
-  examId={test.id}
-  onDeleted={() => {
-    setpyqTests((prev) =>
-      prev.filter((exam) => exam.id !== test.id)
-    );
-  }}
-/>
-          </CardFooter>
-        </Card>
+        <Badge className="shrink-0 bg-emerald-100 text-emerald-700 border border-emerald-200">
+          {test.exam}
+        </Badge>
       </div>
+    </CardHeader>
+
+   
+    <CardContent className="flex-grow relative">
+
+      {/* PAID Overlay */}
+      {test?.accessType === "PAID" && !session?.user?.enrollments?.some(
+    (enrollment) => enrollment.courseId === test.courseId
+  ) && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center
+          bg-black/40 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-2 bg-white/90 px-6 py-4 rounded-xl shadow-lg">
+            <LockIcon className="text-red-600 h-6 w-6" />
+            <p className="font-semibold text-gray-900 poppins">
+              PAID Mock Test
+            </p>
+            <p className="text-sm text-gray-600">
+              Subscribe to unlock access
+            </p>
+            <Link href={'/subscribe'} className="bg-red-600 p-2 px-4 outline-none border-none rounded-md text-white hover:bg-red-700">
+              Upgrade Now
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 gap-3 mb-5">
+        {[
+          {
+            icon: Clock,
+            label: formatDuration(test.totalDurationInSeconds),
+          },
+          {
+            icon: Target,
+            label: `${test.totalQuestions} Questions`,
+          },
+          {
+            icon: BookOpen,
+            label: `${test.subjects.length} Subjects`,
+          },
+          {
+            icon: Award,
+            label: `${test.totalMarks} Marks`,
+          },
+        ].map(({ icon: Icon, label }, i) => (
+          <div
+            key={i}
+            className="flex flex-col items-center justify-center p-3 rounded-xl
+              bg-gray-50 border border-gray-200
+              transition group-hover:bg-emerald-50"
+          >
+            <Icon className="h-5 w-5 text-emerald-600 mb-1" />
+            <span className="text-sm font-medium text-gray-700 text-center">
+              {label}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Topics */}
+      <div className="p-4 rounded-xl bg-gray-50 border border-gray-200">
+        <div className="flex justify-between items-center mb-2">
+          <p className="text-sm font-medium text-gray-800">
+            Topics Covered
+            <span className="ml-1 text-gray-500 font-normal">
+              ({totalChapters})
+            </span>
+          </p>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full hover:bg-gray-200"
+              >
+                <Info className="h-4 w-4 text-gray-500" />
+              </Button>
+            </PopoverTrigger>
+
+            <PopoverContent className="w-80 max-h-80 overflow-y-auto p-4">
+              <p className="font-semibold mb-3 text-gray-900">
+                Subjects & Topics
+              </p>
+
+              {test.subjects.map((subject) => (
+                <div key={subject.name} className="mb-3">
+                  <p className="text-sm font-medium text-gray-700 mb-1">
+                    {subject.name}
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {subject.chapters.map((chapter, idx) => (
+                      <Badge
+                        key={idx}
+                        variant="secondary"
+                        className="text-xs bg-gray-100"
+                      >
+                        {chapter.name}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        <div className="flex flex-wrap gap-1">
+          {test.subjects.map((subject) => (
+            <Badge
+              key={subject.name}
+              className="bg-emerald-100 text-emerald-700 text-xs"
+            >
+              {subject.name}
+            </Badge>
+          ))}
+        </div>
+      </div>
+
+      {/* Login Warning */}
+  
+    </CardContent>
+
+    {/* Footer */}
+    <CardFooter className="pt-3 flex flex-col gap-2">
+     
+     {test.accessType === 'FREE' ? ( <Button
+        onClick={() => handleStartTest(test)}
+        className={`w-full font-medium transition
+          ${isLoggedIn
+            ? "bg-emerald-600 hover:bg-emerald-700"
+            : "bg-amber-500 hover:bg-amber-600"}`}
+      >
+        {isLoggedIn ? "Start Mock Test" : "Login to Start"}
+      </Button>) : 
+      
+      ( <Button
+        onClick={() => handleStartTest(test)}
+        className={` relative w-full font-medium transition
+          ${isLoggedIn
+            ? "bg-emerald-600 hover:bg-emerald-700"
+            : "bg-amber-500 hover:bg-amber-600"}
+            
+            `}
+
+            
+      >
+        
+{
+  session?.user?.enrollments?.some(
+    (enrollment) => enrollment.courseId === test.courseId
+  )
+    ? "Start Mock Test"
+    : !isLoggedIn ? "Login & Subscribe To Unlock" : (<p className=" absolute top-0 left-0  justify-center flex items-center rounded-md w-full h-full bg-red-500 text-white">Subscribe To Start</p>)
+}
+
+
+      </Button>)}
+
+      {/* <DeleteExamButton
+        examId={test.id}
+        onDeleted={() =>
+          setpyqTests((prev) =>
+            prev.filter((exam) => exam.id !== test.id)
+          )
+        }
+      /> */}
+    </CardFooter>
+  </Card>
+</div>
+
     );
   };
 
@@ -419,7 +501,7 @@ const Page: React.FC = () => {
 
             <div className="mt-4 md:mt-0 md:ml-4 md:flex md:items-center">
               <Button
-                onClick={() => handleStartTest(test.id)}
+                onClick={() => handleStartTest(test)}
                 className={`${isLoggedIn ? "bg-emerald-600 hover:bg-emerald-700" : "bg-amber-500 hover:bg-amber-600"}`}
               >
                 {isLoggedIn ? "Start PYQ Test" : "Login to Start"}

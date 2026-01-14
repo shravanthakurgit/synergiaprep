@@ -1,19 +1,41 @@
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import crypto from "crypto";
-import { v4 as uuid } from "uuid";
-import { db } from "@/lib/db";
-const instance = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+import { db } from "@/lib/db"; // or your DB method
 
 export async function POST(req: Request) {
-  const { razorpayOrderId, razorpaySignature, razorpayPaymentId, email, amount , courseId } = await req.json();
-  const body = razorpayOrderId + "|" + razorpayPaymentId;
+  const { razorpayOrderId, razorpaySignature, razorpayPaymentId, email, amount, courseId } = await req.json();
 
+  if (!email) return NextResponse.json({ message: "email is required", error: true }, { status: 400 });
+  if (amount === undefined) return NextResponse.json({ message: "amount is required", error: true }, { status: 400 });
+  if (!courseId) return NextResponse.json({ message: "courseId is required", error: true }, { status: 400 });
+
+  // If amount is 0, skip Razorpay verification
+  if (amount === 0) {
+    // Directly create enrollment
+    const enroll = await db.enrollment.create({
+      data: {
+        user: { connect: { email } },
+        course: { connect: { id: courseId } },
+        totalAmount: 0,
+     // no payment ID for free course
+      },
+    });
+
+   if(enroll){
+     return NextResponse.json({ message: "Free course enrolled successfully",enroll, error: false }, { status: 200 });
+   }
+  }
+
+  // For paid courses, verify Razorpay payment
+  const instance = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID!,
+    key_secret: process.env.RAZORPAY_KEY_SECRET!,
+  });
+
+  const body = razorpayOrderId + "|" + razorpayPaymentId;
   const expectedSignature = crypto
-    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET as string)
+    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
     .update(body.toString())
     .digest("hex");
 
@@ -23,51 +45,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "invalid payment signature", error: true }, { status: 400 });
   }
 
-  // Save payment details to database
-
-  // Send email to user
-  // Update user's subscription status
-
-    if (!email) return NextResponse.json({ message: "email is required", error: true }, { status: 400 });
-    if(!amount) return NextResponse.json({ message: "amount is required", error: true }, { status: 400 });
-    if(!courseId) return NextResponse.json({ message: "courseID is required", error: true }, { status: 400 });
-    
-    // await db.user.update({
-    //     where: {
-    //         email,
-    //     },
-    //     data: {
-    //         Order: {
-    //             create: {
-    //                 totalAmount: amount
-    //             },
-    //         },
-    //     },
-    // });
-
-    const user = await db.user.findUnique({
-      where: { email }
-  });
-  
-    if (!user) {
-        console.log(`User with email ${email} not found`);
-    }
-  
-
-    console.log('email : ',email);
+  console.log('email : ',email);
     console.log('courseId : ',courseId);
-    await db.enrollment.create({
-        data: {
-            user: {
-                connect: { email },  
-            },
-            course: {
-                connect: { id: courseId }, 
-            },
-            totalAmount: amount,
-        },
-    });
-    
 
-  return NextResponse.json({ message: "payment success", error: false }, { status: 200 });
+  // Paid course: create enrollment record
+  await db.enrollment.create({
+    data: {
+      user: { connect: { email } },
+      course: { connect: { id: courseId } },
+      totalAmount: amount,
+      paymentId: razorpayPaymentId || null,
+    },
+  });
+
+  return NextResponse.json({ message: "Payment successful, enrolled!", error: false }, { status: 200 });
 }

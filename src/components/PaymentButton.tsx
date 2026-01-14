@@ -1,4 +1,4 @@
-"use client";
+"use client"; 
 import React, { Suspense, useState } from "react";
 import { redirect, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -7,12 +7,11 @@ import { cn } from "@/lib/utils";
 import Loading from "@/app/(pages)/checkout/loading";
 
 interface PaymentButtonInterface {
-  amount : number;
-  courseId : string;
+  amount: number;
+  courseId: string;
 }
 
-
-const PaymentButton = ({ amount,courseId }: PaymentButtonInterface) => {
+const PaymentButton = ({ amount, courseId }: PaymentButtonInterface) => {
   const { data: userData } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -20,108 +19,176 @@ const PaymentButton = ({ amount,courseId }: PaymentButtonInterface) => {
   const makePayment = async () => {
     setIsLoading(true);
 
-    const data = await fetch("/api/order/create?amount=" + amount);
-    const { order } = await data?.json();
-    const options: RazorpayOptions = {
-      key: process.env.RAZORPAY_KEY_ID || "",
-      name: userData?.user?.email,
-      currency: order.currency,
-      amount: order.amount,
-      order_id: order.id,
-      modal: {
-        ondismiss: function () {
-          setIsLoading(false);
-        },
-      },
-      handler: async function (response: {
-        razorpay_payment_id: string | null;
-        razorpay_order_id: string | null;
-        razorpay_signature: string | null;
-      }) {
-        const data = await fetch("/api/order/verify", {
+    try {
+      const data = await fetch(
+        `/api/order/create?amount=${amount}&courseId=${courseId}`
+      );
+      
+      const response = await data.json();
+      console.log("co res",response)
+      // alert(response.data.order.free)
+      
+      // ✅ Check if it's a free course
+      if (response.order.free === true) {
+        // For free courses, directly call the verify endpoint to create enrollment
+        const verifyResponse = await fetch("/api/order/verify", {
           method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify({
-            razorpayPaymentId: response.razorpay_payment_id,
-            razorpayOrderId: response.razorpay_order_id,
-            razorpaySignature: response.razorpay_signature,
+            razorpayPaymentId: null,
+            razorpayOrderId: null,
+            razorpaySignature: null,
             email: userData?.user?.email,
-            courseId : courseId,
-            amount: amount * 100,
+            courseId: courseId,
+            amount: 0, // Free course
           }),
         });
-
-        const res = await data.json();
-        if (res?.error === false) {
+        
+        const verifyResult = await verifyResponse.json();
+        
+        if (verifyResult?.error === false) {
           router.push("/checkout/success");
-
+        } else {
+          alert(verifyResult?.message || "Failed to enroll in free course");
         }
-      },
-      prefill: {
-        email: userData?.user?.email,
-        contact: userData?.user?.ph_no?.toString(),
-      },
-    };
-
-    interface RazorpayOptions {
-      key: string;
-      name: string | undefined;
-      currency: string;
-      amount: number;
-      order_id: string;
-      modal: {
-        ondismiss: () => void;
-      };
-      handler: (response: {
-        razorpay_payment_id: string | null;
-        razorpay_order_id: string | null;
-        razorpay_signature: string | null;
-      }) => void;
-      prefill: {
-        email: string | undefined;
-        contact: string | undefined;
-      };
-    }
-
-    interface Razorpay {
-      open: () => void;
-      on: (
-        event: string,
-        callback: (response: { error: boolean; message: string }) => void
-      ) => void;
-    }
-
-    const paymentObject = new (
-      window as unknown as {
-        Razorpay: new (options: RazorpayOptions) => Razorpay;
+        
+        setIsLoading(false);
+        return;
       }
-    ).Razorpay(options);
-    paymentObject.open();
+      
+      // ✅ For paid courses, proceed with Razorpay
+      const order = response.order;
+      
+      // Check if order exists
+      if (!order || !order.id) {
+        throw new Error("Invalid order response");
+      }
+      
+      const options: RazorpayOptions = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
+        name: userData?.user?.name || userData?.user?.email || "Customer",
+        description: `Payment for ${order.course?.title || "Course"}`,
+        currency: order.currency || "INR",
+        amount: order.amount * 100, // Convert to paise
+        order_id: order.id,
+        modal: {
+          ondismiss: function () {
+            setIsLoading(false);
+          },
+        },
+        handler: async function (response: {
+          razorpay_payment_id: string | null;
+          razorpay_order_id: string | null;
+          razorpay_signature: string | null;
+        }) {
+          try {
+            const data = await fetch("/api/order/verify", {
+              method: "POST",
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpayOrderId: response.razorpay_order_id,
+                razorpaySignature: response.razorpay_signature,
+                email: userData?.user?.email,
+                courseId: courseId,
+                amount: order.amount * 100, // Send in paise
+              }),
+            });
+            
+            const res = await data.json();
+            if (res?.error === false) {
+              router.push("/checkout/success");
+            } else {
+              alert(res?.message || "Payment verification failed");
+              setIsLoading(false);
+            }
+          } catch (error) {
+            console.error("Verification error:", error);
+            alert("Payment verification failed");
+            setIsLoading(false);
+          }
+        },
+        prefill: {
+          email: userData?.user?.email || "",
+          contact: userData?.user?.ph_no?.toString() || "",
+          name: userData?.user?.name || "",
+        },
+        theme: {
+          color: "#3B82F6",
+        },
+      };
 
-    paymentObject.on(
-      "payment.failed",
-      function (response: { error: boolean; message: string }) {
-        alert("Payment failed. Please try again.");
+      // Razorpay type definitions
+      interface RazorpayOptions {
+        key: string;
+        name: string;
+        description?: string;
+        currency: string;
+        amount: number;
+        order_id: string;
+        modal: {
+          ondismiss: () => void;
+        };
+        handler: (response: {
+          razorpay_payment_id: string | null;
+          razorpay_order_id: string | null;
+          razorpay_signature: string | null;
+        }) => void;
+        prefill: {
+          email: string;
+          contact: string;
+          name?: string;
+        };
+        theme?: {
+          color: string;
+        };
+      }
+
+      // Check if Razorpay is available
+      if (typeof window !== 'undefined' && (window as any).Razorpay) {
+        const Razorpay = (window as any).Razorpay;
+        const paymentObject = new Razorpay(options);
+        
+        paymentObject.on("payment.failed", function (response: any) {
+          console.error("Payment failed:", response.error);
+          alert("Payment failed. Please try again. Reason: " + (response.error?.description || "Unknown error"));
+          setIsLoading(false);
+        });
+        
+        paymentObject.on("payment.success", function (response: any) {
+          console.log("Payment success callback:", response);
+        });
+        
+        paymentObject.open();
+      } else {
+        console.error("Razorpay SDK not loaded");
+        alert("Payment gateway not available. Please refresh the page.");
         setIsLoading(false);
       }
-    );
+      
+    } catch (error) {
+      console.error("Payment initiation error:", error);
+      alert("Failed to initiate payment. Please try again.");
+      setIsLoading(false);
+    }
   };
 
   return (
-    <>
-      <Suspense fallback={<Loading />}>
-        <div className="">
-          <Button
-            className={cn(buttonVariants({ size: "lg" }))}
-            disabled={isLoading}
-            onClick={() => {
-              makePayment();
-            }}
-          >
-            Pay Now
-          </Button>
-        </div>
-      </Suspense>
-    </>
+    <Suspense fallback={<Loading />}>
+      <div className="">
+        <Button
+          className={cn(buttonVariants({ size: "lg" }))}
+          disabled={isLoading}
+          onClick={makePayment}
+        >
+          {isLoading ? "Processing..." : amount === 0 ? "Enroll for Free" : `Pay ₹${amount}`}
+        </Button>
+      </div>
+    </Suspense>
   );
 };
 

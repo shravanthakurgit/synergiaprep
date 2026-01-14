@@ -4,6 +4,7 @@ interface ExamDetails {
   description: string;
   examTypeId: string;
   examType: string;
+  accessType: "FREE" | "PAID";
   examCategoryId: string;
   examCategory: string;
   subjectId?: string;
@@ -11,6 +12,7 @@ interface ExamDetails {
   topicId?: string;
   topic?: string;
   totalDurationInSeconds?: number;
+  courseId?: string;
 }
 
 interface ExamSection {

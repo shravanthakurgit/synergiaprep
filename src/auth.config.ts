@@ -45,9 +45,8 @@ export default {
             token.ph_no = existingUser.ph_no;
             token.role = existingUser.role;
             token.image = existingUser.image;
-            // console.log(token);
-            
-            return token;
+             token.enrollments = existingUser.enrollments || [12,13];
+    return token;
         },
         async session({ session, token }) {
             if (token.sub && session.user) {
@@ -62,6 +61,8 @@ export default {
             if (token.image && session.user) {
                 session.user.image = token.image as string;
             }
+
+              session.user.enrollments = token.enrollments;
             //console.log(session);
             return session;
         },
