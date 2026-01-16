@@ -97,7 +97,7 @@ const ExamPrepPage = () => {
             className="bg-white/20 z-11"
           />
           <Label htmlFor="subscription">is Subscribed?</Label>
-          {session &&
+          {/* {session &&
             session.user &&
             session.user.role.toUpperCase() === "ADMIN" && (
               <div className="ml-auto">
@@ -110,7 +110,7 @@ const ExamPrepPage = () => {
                   </Button>
                 </Link>
               </div>
-            )}
+            )} */}
           {session &&
             session.user &&
             session.user.role.toUpperCase() === "SUPERADMIN" ||  session.user.role.toUpperCase() === "ADMIN"  && (

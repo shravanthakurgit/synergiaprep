@@ -48,6 +48,8 @@ const Certifications = () => {
           personalized solutions
         </p>
 
+       
+
       
 
         {/* Centered Image with Rounded Corners and Explore More Button */}
