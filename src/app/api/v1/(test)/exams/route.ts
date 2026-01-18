@@ -63,6 +63,9 @@ export const GET = async (req: NextRequest) => {
         totalDurationInSeconds: true,
         totalMarks: true,
         totalQuestions: true,
+    accessType: true,
+    courseId: true,   
+   
         chapterToExams: {
           select: {
             id: true,
@@ -104,16 +107,25 @@ export const POST = async (req: NextRequest) => {
       return errorResponse("Invalid Input", 400, validation.error);
     }
 
-    const {
+      const {
       title,
       instructions,
       description,
-      isDraft,
+      isDraft = false,
       examType,
+      accessType,
+      courseId,
       examCategoryId,
       totalDurationInSeconds,
       examSections,
     } = validation.data;
+
+
+
+     if (accessType === "PAID" && !courseId) {
+      return errorResponse("PAID exams must have a courseId", 400);
+    }
+
 
     // Check if exam category exists
     const existingExamCategory = await db.examCategory.findUnique({
@@ -129,13 +141,15 @@ export const POST = async (req: NextRequest) => {
         // Create the exam
         const exam = await prisma.exam.create({
           data: {
-            title,
-            instructions,
-            description,
-            isDraft,
-            examCategory: { connect: { id: examCategoryId } },
-            examType,
-            totalDurationInSeconds,
+              title,
+    instructions,
+    description,
+    isDraft,
+    examType,
+    accessType,
+    course: courseId ? { connect: { id: courseId } } : undefined, 
+    examCategory: { connect: { id: examCategoryId } },
+    totalDurationInSeconds,
             examSections: {
               create: examSections.map((section) => ({
                 name: section.name,

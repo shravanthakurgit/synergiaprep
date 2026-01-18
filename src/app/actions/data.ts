@@ -17,19 +17,29 @@ export const getUserByEmail = async (email: string) => {
 
 };
 export const getUserById = async (id: string | undefined) => {
+    if (!id) return null;
     try {
         const user = await db.user.findUnique({
             where: {
                 id,
             },
+           include: {
+        enrollments: {
+          select: {
+            id: true,
+            courseId: true,
+            userId:true,
+          },
+        },
+      },
         });
         return user;
-    }
-    catch {
+    } catch (err) {
+        console.error(err);
         return null;
     }
-
 };
+
 export const createUser = async (data: {
   name: string;
   email: string;

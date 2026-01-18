@@ -9,6 +9,7 @@ declare module "next-auth" {
             name: string
             ph_no: number
             role: RoleType
+            enrollments: any[]
         }
     }
 }

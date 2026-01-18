@@ -23,6 +23,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 import Image from "next/image";
+import CourseCarousel from "@/components/CourseCarousel";
 
 const demoFeatures = [
   {
@@ -191,20 +192,33 @@ const DemoPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Header */}
+
+
+      
+      
       <div className="bg-white border-b">
+        
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl mt-20 font-bold text-gray-900 mb-4">
+          
+          <div className="text-center mx-auto">
+     
+            
+            <h1 className="text-xl md:text-2xl mt-16 font-bold text-gray-900 mb-4">
+              Explore Our Courses
+            </h1>
+            <CourseCarousel />
+             
+               {/* <h1 className="text-4xl md:text-5xl mt-16 font-bold text-gray-900 mb-4">
               Start Your Exam Preparation
             </h1>
             <p className="text-xl text-gray-600 mb-8">
               Free access to practice materials, PYQs, mock tests, and study
               resources. Create an account to track progress and unlock full
               features.
-            </p>
+            </p> */}
 
             {/* Authentication Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            {/* <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 onClick={handleRegisterRedirect}
                 size="lg"
@@ -220,7 +234,8 @@ const DemoPage = () => {
               >
                 Already have an account? Login
               </Button>
-            </div>
+            </div> */}
+
           </div>
         </div>
       </div>

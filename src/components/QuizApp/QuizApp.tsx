@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import QuizHeader from "./QuizHeader";
 import { submitAttempt } from "@/lib/evaluation-hooks/report-functions";
 import StudyTracker from "../StudyTracker";
+import { ExamGuard } from "../ExamGuard";
 
 const QuizApp = () => {
   const { data: session } = useSession();
@@ -39,6 +40,9 @@ const QuizApp = () => {
   } | null>(null);
 
   const examId = searchParams.get("examId");
+
+  const[accessType, setAccessType] =useState("");
+  const[courseId, setCourseId] =useState(searchParams.get("courseId"));
 
   const [ExamData, setExam] = useState<Exam>({} as Exam);
 
@@ -81,6 +85,12 @@ const QuizApp = () => {
     const fetchExamData = async () => {
       const response = await fetch(`/api/v1/exams/${examId}`);
       const data = await response.json();
+
+      
+
+
+setAccessType(data?.accessType);
+
       setLoading(false);
       if (!response.ok) {
         setFetcherror(true);
@@ -446,6 +456,7 @@ const QuizApp = () => {
 
   return (
     <StudyTracker>
+       {/* <ExamGuard courseId={courseId} accessType={accessType} /> */}
     <div className="min-h-screen">
       {session && currentStep !== "submitted" && (
         <QuizHeader

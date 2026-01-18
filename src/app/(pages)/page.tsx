@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { BsCheck2Circle } from "react-icons/bs";
 import Link from "next/link";
+import CourseList from "@/components/course-list";
 
 // Certifications Component
 // Certifications Component - FIXED VERSION
@@ -46,6 +47,10 @@ const Certifications = () => {
           Revolutionizing learning through cutting-edge technology and
           personalized solutions
         </p>
+
+       
+
+      
 
         {/* Centered Image with Rounded Corners and Explore More Button */}
         {/* Centered Image with Rounded Corners and Explore More Button */}

@@ -8,9 +8,9 @@ export default function CheckoutSuccessPage() {
   const router = useRouter()
 
   return (
-    <div className="container mx-auto px-4 py-16 max-w-2xl text-center">
-      <div className="bg-white rounded-lg shadow p-8">
-        <div className="flex justify-center mb-4">
+    <div className="container mx-auto px-4 py-16 max-w-2xl text-center ">
+      <div className="bg-transparent rounded-lg mt-20 p-8 mt-30">
+        <div className="flex justify-center mb-4 ">
           <div className="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center">
             <CheckCircle className="h-10 w-10 text-green-600" />
           </div>

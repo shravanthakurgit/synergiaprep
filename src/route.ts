@@ -8,6 +8,6 @@ export const privateRoutes = [
   "/upload-test",
 ];
 export const authRoutes = ["/login", "/signup"];
-export const adminRoutes = ["/admin"];
+export const adminRoutes = ["/admin","/superadmin"];
 export const superadminRoutes = ["/api/superadmin"];
 export const examprepapiRoutes = ["/api/v1"];

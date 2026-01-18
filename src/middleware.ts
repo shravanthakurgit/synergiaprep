@@ -68,6 +68,7 @@ export const middleware = auth((req) => {
 export const config = {
   matcher: [
     "/admin/:path*",
+    "/superadmin/:path*",
     "/examprep/:path*",
     "/test-razorpay/:path*",
     "/upload-test/:path*",

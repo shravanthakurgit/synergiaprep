@@ -28,10 +28,12 @@ const ExamCreator = ({
       description: "",
       examTypeId: "",
       examType: "",
+      accessType:"FREE",
       examCategoryId: "",
       examCategory: "",
       topicId: "",
       topic: "",
+      courseId: "",
     }
   );
   const [examSections, setExamSections] = useState<SectionFormState[]>(
@@ -157,7 +159,9 @@ const ExamCreator = ({
         description: ExamDetails.description,
         isDraft: false,
         examType: ExamDetails.examType,
+        accessType: ExamDetails.accessType,
         examCategoryId: ExamDetails.examCategoryId,
+        courseId: ExamDetails.courseId, 
         totalDurationInSeconds: ExamDetails.totalDurationInSeconds,
         examSections: sectionsWithUrls.map((section) => ({
           name: section.name,

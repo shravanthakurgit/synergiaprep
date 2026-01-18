@@ -40,13 +40,21 @@ model User {
   updatedAt DateTime  @updatedAt
 }
 
+enum SubscriptionType {
+  FREE
+  PAID
+}
+
 model Subscription {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subType      SubscriptionType @default(FREE)
+  pyqAccess Boolean  @default(true)
+  mockLimit Int      @default(3) // FREE = 3, PAID = 13
   isActive  Boolean  @default(true)
   startedAt DateTime @default(now())
-  endsAt    DateTime
+  endsAt    DateTime?
 }
 
 model Account {
@@ -71,14 +79,22 @@ model Account {
 }
 
 // probably add subscription id also here
- model Order {
-   id          String   @id @default(cuid())
-   userId      String
-   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-   totalAmount Float
-   createdAt   DateTime @default(now())
-   updatedAt   DateTime @updatedAt
- }
+model Order {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  totalAmount   Float    // original amount
+  discount      Float    @default(0)
+  finalAmount   Float    // totalAmount - discount
+
+  couponId      String?
+  coupon        Coupon?  @relation(fields: [couponId], references: [id])
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
 
 model Session {
   sessionToken String   @unique
@@ -203,12 +219,19 @@ enum ExamType {
   BRAINSTORM
 }
 
+enum ExamAccessType {
+  FREE
+  PAID
+}
+
 model Exam {
   id                     String  @id @default(cuid())
   title                  String?
   instructions           String?
   description            String?
   totalDurationInSeconds Int?    @map(name: "total_duration_in_seconds")
+
+  accessType ExamAccessType @default(FREE)
 
   totalQuestions Int   @default(0) @map(name: "total_questions")
   totalMarks     Float @default(0) @map(name: "total_marks")
@@ -217,10 +240,14 @@ model Exam {
 
   examType ExamType @map("exam_type")
 
-  examCategoryId String       @map(name: "exam_category_id")
-  examCategory   ExamCategory @relation(fields: [examCategoryId], references: [id], onDelete: Cascade)
+  examCategoryId String?
+  examCategory   ExamCategory? @relation(fields: [examCategoryId], references: [id], onDelete: Cascade)
+
+  courseId String?  // optional
+  course   Course?  @relation(fields: [courseId], references: [id])
 
   chapterToExams ChapterToExam[]
+  courseExams CourseExam[]
 
   examSections    ExamSection[]
   UserSubmissions UserSubmission[]
@@ -231,8 +258,8 @@ model Exam {
   ExamAttempt ExamAttempt[]
 
   ExamStatistics ExamStatistics[]
-  courseExams    CourseExam[]
 }
+
 
 // chapter[] inside exam , exam[] inside chapter
 model ChapterToExam {
@@ -465,6 +492,7 @@ model Course {
   courseCategories CourseToExamCategory[]
   courseExams      CourseExam[]
   enrollments      Enrollment[]
+  exams Exam[]
 }
 
 model CourseToExamCategory {
@@ -494,6 +522,7 @@ model Enrollment {
 
   courseId String
   course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  paymentId String?
 
   totalAmount Float
   createdAt   DateTime @default(now())
@@ -524,3 +553,24 @@ model ArchivePDF {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+
+model Coupon {
+  id                String   @id @default(cuid())
+  code              String   @unique
+  fixedDiscount     Float    // flat discount value (e.g. 100 = ₹100 off)
+  minOrderAmount    Float    // order total must be >= this value
+  isActive          Boolean  @default(true)
+
+  validFrom         DateTime @default(now())
+  validTill         DateTime?
+
+  usageLimit        Int?     // optional: total times coupon can be used
+  usedCount         Int      @default(0)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  orders            Order[]
+}
+

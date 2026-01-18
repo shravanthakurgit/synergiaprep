@@ -31,6 +31,7 @@ export function ExamDetailsForm({
   ExamDetails: ExamDetails;
   setCurrentStep: React.Dispatch<React.SetStateAction<string>>;
   setExamDetails: React.Dispatch<React.SetStateAction<ExamDetails>>;
+  
 }) {
   // Merge in default values for "year" and totalDurationInSeconds to ensure controlled inputs.
   const form = useForm<ExamDetailsFormValues>({
@@ -43,6 +44,11 @@ export function ExamDetailsForm({
           : 0, // provide a default value for the number input
     },
   });
+
+  const [courses, setCourses] = useState<
+  { id: string; title: string }[]
+>([]);
+
 
   const examTypes = ["PYQ", "MOCK", "PRACTICE", "QUIZ", "BRAINSTORM"].map(
     (type, idx) => ({ id: idx, name: type })
@@ -62,6 +68,26 @@ export function ExamDetailsForm({
 
   function onSubmit(data: ExamDetailsFormValues) {
     setIsSubmit(true);
+ 
+
+      if (data.accessType === "PAID") {
+    const selectedCourse = courses.find(
+      (course) => course.id === data.courseId
+    );
+
+    if (!selectedCourse) {
+      alert("Please select a course for paid exams");
+      setIsSubmit(false);
+      return;
+    }
+
+    // // Log or alert course ID and name
+    // console.log("Selected Course ID:", selectedCourse.id);
+    // console.log("Selected Course Name:", selectedCourse.title);
+    // alert(`Selected Course: ${selectedCourse.title} (ID: ${selectedCourse.id})`);
+  }
+
+
     const selectedExamType = examTypes.find(
       (type) => type.id === Number(data.examTypeId)
     );
@@ -101,9 +127,15 @@ export function ExamDetailsForm({
   useEffect(() => {
     async function fetchData() {
       try {
-        const [responseCategories] = await Promise.all([
+        const  [responseCategories, responseCourses] = await Promise.all([
           fetch("/api/v1/exam-categories"),
+           fetch("/api/v1/courses"),
         ]);
+
+  
+const coursesData = await responseCourses.json();
+
+setCourses(coursesData.data || []);
 
         const [categoriesData] = await Promise.all([responseCategories.json()]);
 
@@ -160,6 +192,80 @@ export function ExamDetailsForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-6">
+
+
+ <div className="flex flex-wrap flex-col lg:flex-row gap-8">
+   <FormItem className="flex-1">
+    <FormLabel>Exam Access *</FormLabel>
+    <Select
+      value={ExamDetails.accessType}
+      onValueChange={(value) =>
+        setExamDetails({
+          ...ExamDetails,
+          accessType: value as "FREE" | "PAID",
+        })
+      }
+    >
+      <FormControl>
+        <SelectTrigger>
+          <SelectValue placeholder="Select FREE or PAID" />
+        </SelectTrigger>
+      </FormControl>
+      <SelectContent>
+        <SelectItem value="FREE">FREE</SelectItem>
+        <SelectItem value="PAID">PAID</SelectItem>
+      </SelectContent>
+    </Select>
+   </FormItem>
+
+    <FormItem className="flex-1">
+      <FormLabel>Course *</FormLabel>
+      <Select
+        value={ExamDetails.courseId || ""}
+        onValueChange={(value) =>
+          setExamDetails((prev) => ({
+            ...prev,
+            courseId: value,
+          }))
+        }
+      >
+        <FormControl>
+          <SelectTrigger>
+            <SelectValue placeholder="Select Course " />
+          </SelectTrigger>
+        </FormControl>
+        <SelectContent>
+          {courses.map((course) => (
+            <SelectItem key={course.id} value={course.id}>
+              {course.title}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </FormItem>
+ </div>
+
+
+{/* <select
+  value={ExamDetails.accessType}
+  onChange={(e) =>
+    setExamDetails({
+      ...ExamDetails,
+      accessType: e.target.value as "FREE" | "PAID",
+    })
+  }
+  className="border rounded-md px-3 py-2 pr-6"
+  required
+>
+  <option value="FREE">Free</option>
+  <option value="PAID">Paid</option>
+</select> */}
+
+
+
+
+
+        
         <FormField
         rules={{ required: "Title is required" }}
           control={form.control}

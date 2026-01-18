@@ -32,6 +32,8 @@ import { Textarea } from "@/components/ui/textarea"
 // Import the existing admin components
 import ExamCreator from "@/components/Admin/ExamCreator2/ExamCreator"
 import OtherExamForms from "@/components/Admin/Other/OtherExamForms"
+import { RiCoupon4Line, RiCouponFill } from "react-icons/ri"
+import { useRouter } from "next/navigation"
 
 // Mock admin modules
 const mockAdminModules = [
@@ -147,6 +149,8 @@ export default function AdminControl() {
   const [isIntegrateDialogOpen, setIsIntegrateDialogOpen] = useState(false)
   const [selectedComponent, setSelectedComponent] = useState<string | undefined>(undefined)
 
+  const router = useRouter()
+
   useEffect(() => {
     // Simulate API call to fetch admin data
     const fetchData = async () => {
@@ -253,11 +257,14 @@ export default function AdminControl() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       <div>
         <h2 className="text-3xl font-bold tracking-tight">Admin Control Panel</h2>
         <p className="text-muted-foreground">Manage admin modules, users, and monitor activity.</p>
       </div>
+
+
+      <button className=" flex flex-wrap gap-3 justify-center items-center bg-green-600 px-4 py-2 rounded md absolute top-0 text-white !poppinsmd font-bold right-5 " onClick={()=>router.push('/superadmin/coupon')}>Coupon Code<RiCouponFill/> </button>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>

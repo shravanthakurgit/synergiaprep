@@ -5,9 +5,9 @@ import { Loader2 } from "lucide-react"
 export default function HomePage() {
   return (
     <main className="container mx-auto px-4 py-8">
-      <div className="mb-8 text-center">
+      <div className="mb-8 text-center mt-16">
         <h1 className="text-3xl font-bold tracking-tight">Premium Courses</h1>
-        <p className="mt-2 text-muted-foreground">Expand your skills with our expert-led courses</p>
+        <p className="mt-2 text-muted-foreground mt-4">Expand your skills with our expert-led courses</p>
       </div>
 
       <Suspense

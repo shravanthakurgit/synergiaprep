@@ -217,11 +217,14 @@ export const ExamSectionUpdateValidationSchema =
 const BaseExamValidationSchema = z
   .object({
     title: z.string().min(1),
+    accessType: z.enum(["FREE", "PAID"]),
     instructions: z.string().optional(),
     description: z.string().optional(),
     isDraft: z.boolean().optional(),
     examType: ExamTypeValidationSchema,
+
     examCategoryId: z.string(),
+    courseId: z.string().optional(), // <-- Add this
     totalDurationInSeconds: z.number().int().positive().optional(),
     examSections: z.array(
       BaseExamSectionSchema.extend({
@@ -230,6 +233,7 @@ const BaseExamValidationSchema = z
     ),
   })
   .strict();
+
 
 export const ExamCreateValidationSchema = BaseExamValidationSchema.superRefine(
   (data, ctx) => {

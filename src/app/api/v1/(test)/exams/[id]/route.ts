@@ -27,6 +27,9 @@ export const GET = async (
       where: {
         id: examId,
       },
+
+
+      
       include: {
         examCategory: {
           select: {
