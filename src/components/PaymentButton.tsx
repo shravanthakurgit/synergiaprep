@@ -30,14 +30,14 @@ const PaymentButton = ({ amount, courseId, couponCode }: PaymentButtonInterface)
 
     try {
         const data = await fetch("/api/order/create", {
-    method: "POST", // must be POST
+    method: "POST", 
     headers: {
-      "Content-Type": "application/json", // tell Next.js API to parse JSON
+      "Content-Type": "application/json", 
     },
     body: JSON.stringify({
-      courseId,       // your course ID
-      amount,         // optional if your API calculates price
-      couponCode,     // optional if user entered a coupon
+      courseId,       
+      amount,         
+      couponCode,     
     }),
   });
 
@@ -109,42 +109,31 @@ const PaymentButton = ({ amount, courseId, couponCode }: PaymentButtonInterface)
             setIsLoading(false);
           },
         },
-        handler: async function (response: {
-          razorpay_payment_id: string | null;
-          razorpay_order_id: string | null;
-          razorpay_signature: string | null;
-        }) {
-          try {
-            const data = await fetch("/api/order/verify", {
-              method: "POST",
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                razorpayPaymentId: response.razorpay_payment_id,
-                razorpayOrderId: response.razorpay_order_id,
-                razorpaySignature: response.razorpay_signature,
-                email: session?.user?.email,
-                courseId: courseId,
-                amount: order.amount * 100, // Send in paise
-                couponCode
-              }),
-            });
-            
-            const res = await data.json();
-            if (res?.error === false) {
-              router.push("/checkout/success");
-            } else {
-              setResMsg(res?.message || "Payment verification failed");
-              setIsLoading(false);
-              return
-            }
-          } catch (error) {
-            console.error("Verification error:", error);
-            setResMsg("Payment verification failed");
-            setIsLoading(false);
-          }
-        },
+        handler: async (response) => {
+  const data = await fetch("/api/order/verify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      razorpayPaymentId: response.razorpay_payment_id,
+      razorpayOrderId: response.razorpay_order_id,
+      razorpaySignature: response.razorpay_signature,
+      email: session?.user?.email,
+      courseId,
+      amount: order.amount * 100,
+      couponCode,
+    }),
+  });
+
+  const res = await data.json();
+
+  if (res?.error === false) {
+    router.push("/checkout/success");
+  } else {
+    setResMsg(res?.message || "Payment verification failed");
+    setIsLoading(false);
+  }
+},
+
         prefill: {
           email: session?.user?.email || "",
           contact: session?.user?.ph_no?.toString() || "",
@@ -182,27 +171,31 @@ const PaymentButton = ({ amount, courseId, couponCode }: PaymentButtonInterface)
       }
 
       // Check if Razorpay is available
-      if (typeof window !== 'undefined' && (window as any).Razorpay) {
-        const Razorpay = (window as any).Razorpay;
-        const paymentObject = new Razorpay(options);
-        
-        paymentObject.on("payment.failed", function (response: any) {
-          console.error("Payment failed:", response.error);
-          setResMsg("Payment failed. Please try again. Reason: " + (response.error?.description || "Unknown error"));
-          setIsLoading(false);
-        });
-        
-        paymentObject.on("payment.success", function (response: any) {
-          console.log("Payment success callback:", response);
-        });
-        
-        paymentObject.open();
-      } else {
-        console.error("Razorpay SDK not loaded");
-        setResMsg("Payment gateway not available. Please refresh the page.");
-        setIsLoading(false);
-        return
-      }
+     if (typeof window !== "undefined" && window.Razorpay) {
+  const paymentObject = new window.Razorpay(options);
+
+  paymentObject.on("payment.failed", (response) => {
+    if ("error" in response) {
+      console.error("Payment failed:", response.error);
+      setResMsg(
+        "Payment failed. Reason: " +
+          (response.error.description || "Unknown error")
+      );
+    }
+    setIsLoading(false);
+  });
+
+  paymentObject.on("payment.success", (response) => {
+    console.log("Payment success callback:", response);
+  });
+
+  paymentObject.open();
+} else {
+  console.error("Razorpay SDK not loaded");
+  setResMsg("Payment gateway not available. Please refresh the page.");
+  setIsLoading(false);
+}
+
       
     } catch (error) {
       console.error("Payment initiation error:", error);

@@ -46,6 +46,11 @@ import { useRouter } from "next/navigation";
 import DeleteExamButton from "@/components/DeleteExamButton";
 import Link from "next/link";
 
+interface Enrollment {
+  courseId: string;
+}
+
+
 export interface Test {
   id: string;
   title: string;
@@ -93,6 +98,10 @@ const TestListing: React.FC<TestListingProps> = ({
 
   const isLoggedIn = status === "authenticated";
 
+  const userEnrollments: Enrollment[] =
+  session?.user?.enrollments ?? [];
+
+
   useEffect(() => {
     const fetchTests = async () => {
       setLoading(true);
@@ -128,9 +137,10 @@ router.push(`/exam?examId=${test.id}&type=${type}&courseId=${test.courseId}`); r
     
 
     // Check subscription
-    const isSubscribed = session?.user?.enrollments?.some(
-      (e: any) => e.courseId === test.courseId
-    );
+    const isSubscribed = userEnrollments.some(
+  (e) => e.courseId === test.courseId
+);
+
 
     // Not subscribed → subscribe page
     if (!isSubscribed) {
@@ -209,7 +219,8 @@ router.push(`/exam?examId=${test.id}&type=${type}&courseId=${test.courseId}`); r
   const renderTestCard = (test: Test) => {
     const totalChapters = test.subjects.flatMap((s) => s.chapters).length;
     const isSubscribed = session?.user?.enrollments?.some(
-      (enrollment: any) => enrollment.courseId === test.courseId
+      (enrollment) => enrollment.courseId === test.courseId
+
     );
 
     return (
@@ -384,7 +395,8 @@ router.push(`/exam?examId=${test.id}&type=${type}&courseId=${test.courseId}`); r
                 }`}
               >
                 {session?.user?.enrollments?.some(
-                  (enrollment: any) => enrollment.courseId === test.courseId
+                  (enrollment) => enrollment.courseId === test.courseId
+
                 )
                   ? `Start ${getTestTypeText()}`
                   : !isLoggedIn ? "Login & Subscribe To Unlock" : (
@@ -411,7 +423,8 @@ router.push(`/exam?examId=${test.id}&type=${type}&courseId=${test.courseId}`); r
   const renderTestRow = (test: Test) => {
     const totalChapters = test.subjects.flatMap((s) => s.chapters).length;
     const isSubscribed = session?.user?.enrollments?.some(
-      (enrollment: any) => enrollment.courseId === test.courseId
+      (enrollment) => enrollment.courseId === test.courseId
+
     );
 
     return (
@@ -544,7 +557,8 @@ router.push(`/exam?examId=${test.id}&type=${type}&courseId=${test.courseId}`); r
                   className={`relative ${isLoggedIn ? "bg-emerald-600 hover:bg-emerald-700" : "bg-amber-500 hover:bg-amber-600"}`}
                 >
                   {session?.user?.enrollments?.some(
-                    (enrollment: any) => enrollment.courseId === test.courseId
+                    (enrollment) => enrollment.courseId === test.courseId
+
                   )
                     ? `Start ${getTestTypeText()}`
                     : !isLoggedIn ? "Login & Subscribe" : (

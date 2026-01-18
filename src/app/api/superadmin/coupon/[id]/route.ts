@@ -4,15 +4,18 @@ import { checkAuthAdmin } from "@/lib/utils/auth-check-in-exam-api";
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> } // Change here
 ) {
   try {
-      const authResponse = await checkAuthAdmin();
-  if (authResponse) return authResponse;
+    const authResponse = await checkAuthAdmin();
+    if (authResponse) return authResponse;
+    
+    // Await the params promise
+    const resolvedParams = await params; // Add this line
     const data = await req.json();
 
     const coupon = await db.coupon.update({
-      where: { id: params.id },
+      where: { id: resolvedParams.id }, // Change to resolvedParams
       data: {
         fixedDiscount: Number(data.fixedDiscount),
         minOrderAmount: Number(data.minOrderAmount),
@@ -31,17 +34,19 @@ export async function PUT(
   }
 }
 
-
 export async function DELETE(
   _: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> } // Change here
 ) {
-
-    const authResponse = await checkAuthAdmin();
+  const authResponse = await checkAuthAdmin();
   if (authResponse) return authResponse;
+  
   try {
+    // Await the params promise
+    const resolvedParams = await params; // Add this line
+    
     await db.coupon.delete({
-      where: { id: params.id },
+      where: { id: resolvedParams.id }, // Change to resolvedParams
     });
 
     return NextResponse.json({ success: true });
