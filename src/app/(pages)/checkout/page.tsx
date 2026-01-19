@@ -120,12 +120,19 @@ const [isValid, setIsValid] = useState(false)
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <h1 className="text-2xl font-bold text-center mb-8">Course Checkout</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         <div className="md:col-span-2">
-          <div className="bg-white rounded-lg shadow p-6">
-            <Image src={course.thumbnailUrl} alt={course.title} height={400} width={800} className="rounded-lg" />
-            <h2 className="text-xl font-bold mb-2">{course.title}</h2>
-            <p className="text-md text-muted-foreground mb-4">
+          <div className="bg-white rounded-lg shadow p-6 sm:mx-32 pt-12">
+    <div className="relative w-full h-48 md:h-64">
+  <Image 
+    src={course.thumbnailUrl} 
+    alt={course.title} 
+    fill
+    className="rounded-lg object-contain" 
+  />
+</div>
+            <h2 className="text-xl font-bold mb-2 mt-3">{course.title}</h2>
+            <p className="text-md text-muted-foreground mb-4 ">
               {course.subtitle}
             </p>
 
@@ -149,7 +156,7 @@ const [isValid, setIsValid] = useState(false)
           </div>
         </div>
 
-        <div className="md:col-span-1">
+        <div className="md:col-span-1 max-w-sm sm:px-10 sm:-ml-40">
           <div className="bg-white rounded-lg shadow p-6 sticky top-4">
             <h2 className="text-lg font-semibold mb-4">Order summary</h2>
 
