@@ -33,8 +33,6 @@ export function Hero() {
     <>
       {/* Hero section */}
       <section className="w-full bg-[#0055ff] py-20 lg:py-24 relative z-0">
-
-
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center px-4 sm:px-6 md:px-8 gap-8 lg:gap-16">
           {/* LEFT CONTENT */}
           <div className="w-full lg:w-3/5 xl:w-3/4">
@@ -49,10 +47,6 @@ export function Hero() {
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-snug lg:leading-tight mb-4 sm:mb-6">
                 Revolutionizing Exam Preparation with Tech Innovation
               </h1>
-
-
-
-
 
               <p className="text-base sm:text-lg md:text-xl text-white font-medium mb-3 sm:mb-4">
                 Your Journey, Our Spark of Innovation
@@ -109,7 +103,6 @@ export function Hero() {
           </div>
         </div>
       </section>
-
       {/* Feature Cards Section */}
       <div className="relative w-full mb-[-4rem] sm:mb-[-6rem] px-4 sm:px-6 z-10">
         <div className="max-w-7xl mx-auto mt-8 sm:mt-16 md:mt-20 lg:-translate-y-24 xl:-translate-y-36">

@@ -4,8 +4,8 @@ import { v4 as uuid } from "uuid";
 import { db } from "@/lib/db";
 
 const instance = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
+  key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+  key_secret: process.env.NEXT_PUBLIC_RAZORPAY_KEY_SECRET!,
 });
 
 export async function POST(req: Request) {
