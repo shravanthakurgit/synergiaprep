@@ -257,7 +257,7 @@ router.push(`/exam?examId=${test.id}&type=${type}&courseId=${test.courseId}`); r
                   </p>
                   <p className="text-sm text-gray-600 !poppinsmd font-semibold -mt-2">Subscribe to unlock access</p>
                   <Link
-                    href="/subscribe"
+                    href={`/checkout?courseId=${test.courseId}`}
                     className="bg-red-600 p-2 px-4 outline-none border-none rounded-full mt-2 flex justify-center items-center text-white hover:bg-red-700 tracking-wide !poppinsmd text-sm font-semibold"
                   >
                     Upgrade Now
