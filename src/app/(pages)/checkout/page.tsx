@@ -156,7 +156,7 @@ const [isValid, setIsValid] = useState(false)
           </div>
         </div>
 
-        <div className="md:col-span-1 max-w-sm sm:px-10 sm:-ml-40">
+        <div className="md:col-span-1 lg:max-w-sm lg:px-10 lg:-ml-40 sm:mx-auto">
           <div className="bg-white rounded-lg shadow p-6 sticky top-4">
             <h2 className="text-lg font-semibold mb-4">Order summary</h2>
 
