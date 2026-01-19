@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { createUser, getUserByEmail } from "@/app/actions/data";
 import { redirect } from "next/navigation";
 import { login } from "../actions/login";
 import bcrypt from "bcryptjs";
+import { useSession } from "next-auth/react";
 
 const AuthForm = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -31,9 +32,19 @@ const AuthForm = () => {
   const [resetToken, setResetToken] = useState<string | null>(null);
   const [resetConfirmPassword, setResetConfirmPassword] = useState("");
 
+  const {data:session,status} = useSession()
+
   const router = useRouter();
   const params = useSearchParams();
   const redirectNext = params.get("next") || "/examprep";
+
+
+    useEffect(() => {
+    if (status === "authenticated") {
+      // User is logged in, redirect to home or next parameter
+      router.push(redirectNext);
+    }
+  }, [status]);
 
   const handleRequestVerificationOTP = async (e: React.FormEvent) => {
     e.preventDefault();
