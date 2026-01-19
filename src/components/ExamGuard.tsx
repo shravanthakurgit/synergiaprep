@@ -4,20 +4,19 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
-type AccessType = 'FREE' | 'PAID';
 
 export function ExamGuard({
   courseId,
   accessType,
 }: {
   courseId: string;
-  accessType: AccessType;
+  accessType: string;
 }) {
   const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    console.log("AccessType from ", accessType);
+    console.log("AccessType from ", accessType, courseId);
     if (status === 'loading') return;
 
     // Admin bypass (optional but recommended)
@@ -32,7 +31,7 @@ export function ExamGuard({
     );
 
     if (!isSubscribed) {
-      router.push(`/subscribe?courseId=${courseId}`);
+      router.push(`/checkout?courseId=${courseId}`);
     }
   }, [status, session, courseId, accessType, router]);
 

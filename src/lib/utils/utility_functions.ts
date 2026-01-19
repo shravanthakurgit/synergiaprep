@@ -116,12 +116,18 @@ export const transformExamResponse = (response: ExtendedExam) => {
         ...rest
     } = response;
 
+    // Handle null examCategory
+    const examCategory = response.examCategory ? {
+        id: response.examCategory.id,
+        name: response.examCategory.name
+    } : null;
+
     const subjects = getChaptersWithinSubjectsFromChapterToExam(chapterToExams);
-    // 3. Remove unnecessary fields from examSections and nested objects
     const transformedExamSections = examSections.map(getAllSectionDataFromExamSection);
 
     return {
         ...rest,
+        examCategory, // Include examCategory in the response
         subjects,
         examSections: transformedExamSections,
     };

@@ -19,7 +19,7 @@ export interface ExtendedExamCategory extends ExamCategory {
     subjectToExamCategories: ExtendedSubjectToExamCategory[];
 }
 
-export interface ReducedExamCategory extends Pick<ExamCategory,'id' | 'name'> {}
+export type ReducedExamCategory = Pick<ExamCategory, 'id' | 'name'>;
 
 export interface ExtendedChapterToExam extends Pick<ChapterToExam,'id'> {
     chapter : (ExtendedChapter & {
@@ -57,7 +57,7 @@ export interface ExtendedExamSectionWithReducedSectionConfig extends ExamSection
 export interface ExtendedExam extends Exam {
     examSections : ExtendedExamSection[];
     chapterToExams : ExtendedChapterToExam[];
-    examCategory : ReducedExamCategory;
+    examCategory : ReducedExamCategory | null;
 }
 
 

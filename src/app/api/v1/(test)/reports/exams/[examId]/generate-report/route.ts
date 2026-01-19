@@ -48,7 +48,16 @@ export async function POST(
       where: { userSubmissionId: userSubmissionId },
       include: {
         exam: {
-          include: {
+          select: {
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+            title: true,
+            instructions: true,
+            description: true,
+            totalDurationInSeconds: true,
+            examType: true,
+            examCategoryId: true,
             examSections: {
               include: {
                 questions: {
@@ -66,6 +75,15 @@ export async function POST(
     if (!examAttempt || !userSubmission) {
       return errorResponse("Exam attempt or submission not found", 404);
     }
+
+    if (!examAttempt.exam.examCategoryId) {
+      return errorResponse("Exam category not found", 404);
+    }
+
+    const typedExam = {
+      ...examAttempt.exam,
+      examCategoryId: examAttempt.exam.examCategoryId,
+    };
 
     const existingReport = await db.analysisReport.findFirst({
       where: {
@@ -95,7 +113,11 @@ export async function POST(
       where: { examId },
     });
 
-    const report = generateReport(examAttempt, examStats, userSubmission);
+    const report = generateReport(
+      { ...examAttempt, exam: typedExam },
+      examStats,
+      userSubmission
+    );
 
     // Convert report data to Prisma.InputJsonValue with proper type assertion
     const createData: Prisma.AnalysisReportCreateInput = {
@@ -175,7 +197,7 @@ export async function POST(
     console.error("Error generating report:", error);
     return errorResponse("Internal server error", 500, error);
   }
-}
+} // <-- This closing brace was missing!
 
 // Define interfaces for the report structure with index signatures
 interface TopicPerformance {
@@ -183,7 +205,7 @@ interface TopicPerformance {
   accuracy: number;
   questions: number;
   correct: number;
-  [key: string]: unknown; // Add index signature for JSON compatibility
+  [key: string]: unknown;
 }
 
 interface DifficultyPerformance {
@@ -191,7 +213,7 @@ interface DifficultyPerformance {
   accuracy: number;
   questions: number;
   correct: number;
-  [key: string]: unknown; // Add index signature for JSON compatibility
+  [key: string]: unknown;
 }
 
 interface OverallPerformance {
@@ -205,19 +227,19 @@ interface OverallPerformance {
   incorrectAnswers: number;
   unattemptedQuestions: number;
   maxMarks: number;
-  [key: string]: unknown; // Add index signature for JSON compatibility
+  [key: string]: unknown;
 }
 
 interface TimeManagement {
   totalTimeTaken: number;
   averageTimePerQuestion: number;
-  [key: string]: unknown; // Add index signature for JSON compatibility
+  [key: string]: unknown;
 }
 
 interface StrengthsAndWeaknesses {
   strengths: string[];
   weaknesses: string[];
-  [key: string]: unknown; // Add index signature for JSON compatibility
+  [key: string]: unknown;
 }
 
 interface GeneratedReport {
@@ -338,7 +360,6 @@ function generateReport(
     examId: string;
   }
 ): GeneratedReport {
-  // Calculate total questions from the exam structure
   let totalQuestions = 0;
   examAttempt.exam.examSections.forEach((section) => {
     totalQuestions += section.questions.length;
@@ -363,7 +384,6 @@ function generateReport(
 
     topicPerformance[chapter].total++;
 
-    // Check if the answer is correct (all chosen options are correct)
     const isCorrect =
       answer.chosenOptions.length > 0 &&
       answer.chosenOptions.every((option) => option.option.isCorrect);
@@ -403,19 +423,16 @@ function generateReport(
     .filter((topic) => topic.accuracy < 50)
     .map((topic) => topic.topic);
 
-  // Calculate unattempted questions
   const unattemptedQuestions = Math.max(
     0,
     totalQuestions - examAttempt.attemptedQuestions
   );
 
-  // Calculate accuracy as percentage (0-100) to match frontend expectation
   const accuracyPercentage =
     examAttempt.attemptedQuestions > 0
       ? (examAttempt.correctAnswers / examAttempt.attemptedQuestions) * 100
       : 0;
 
-  // Ensure score is a percentage (if it's stored as raw count, convert it)
   const scorePercentage =
     examAttempt.score > 100
       ? (examAttempt.correctAnswers / totalQuestions) * 100
@@ -423,25 +440,25 @@ function generateReport(
 
   return {
     overallPerformance: {
-      score: scorePercentage, // Percentage score (0-100)
+      score: scorePercentage,
       percentile: examAttempt.percentile || 0,
       rank: examAttempt.rank || 0,
-      accuracy: accuracyPercentage / 100, // Convert to decimal (0-1) for frontend
+      accuracy: accuracyPercentage / 100,
       totalQuestions: totalQuestions,
       attemptedQuestions: examAttempt.attemptedQuestions,
       correctAnswers: examAttempt.correctAnswers,
       incorrectAnswers: examAttempt.incorrectAnswers,
       unattemptedQuestions: unattemptedQuestions,
-      maxMarks: 100, // Assuming 100 is max marks
+      maxMarks: 100,
     },
     topicWisePerformance,
     difficultyWisePerformance,
     timeManagement: {
-      totalTimeTaken: examAttempt.timeTaken, // in seconds
+      totalTimeTaken: examAttempt.timeTaken,
       averageTimePerQuestion:
         examAttempt.attemptedQuestions > 0
           ? examAttempt.timeTaken / examAttempt.attemptedQuestions
-          : 0, // in seconds
+          : 0,
     },
     strengthsAndWeaknesses: {
       strengths,
