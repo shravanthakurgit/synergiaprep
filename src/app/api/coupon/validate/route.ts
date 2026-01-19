@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
     const course = await db.course.findUnique({
       where: { id: courseId },
-      select: { price: true },
+      select: { price: true, discount:true },
     });
 
     if (!course) {
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
       );
     }
 
-    if (course.price < coupon.minOrderAmount) {
+    if ((course.price - course.discount) < coupon.minOrderAmount) {
       return NextResponse.json(
         {
           error: `Coupon ${couponCode} Valid For Above ₹${coupon.minOrderAmount}`,
@@ -54,8 +54,8 @@ export async function POST(req: Request) {
       );
     }
 
-    const discount = Math.min(coupon.fixedDiscount, course.price);
-    const finalAmount = course.price - discount;
+    const discount = Math.min(coupon.fixedDiscount, (course.price - course.discount)) + course.discount;
+    const finalAmount = (course.price) - discount ;
 
     return NextResponse.json({
       success: true,

@@ -62,7 +62,7 @@ export async function POST(req: Request) {
         );
       }
 
-      if (coupon.minOrderAmount && course.price < coupon.minOrderAmount) {
+      if (coupon.minOrderAmount && (course.price - course.discount) < coupon.minOrderAmount) {
         return NextResponse.json(
           {
             error: true,
@@ -79,11 +79,14 @@ export async function POST(req: Request) {
         );
       }
 
-      discount = coupon.fixedDiscount;
+      discount = course.discount + coupon.fixedDiscount;
       appliedCoupon = { code: coupon.code, fixedDiscount: coupon.fixedDiscount };
     }
 
-    const finalAmount = Math.max(course.price - discount, 0);
+    const finalAmount = Math.max(
+  course.price - discount,
+  0
+);
 
     // Free course
     if (finalAmount === 0) {

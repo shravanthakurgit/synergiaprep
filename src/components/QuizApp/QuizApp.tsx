@@ -42,7 +42,9 @@ const QuizApp = () => {
   const examId = searchParams.get("examId");
 
   const[accessType, setAccessType] =useState("");
-  const[courseId, setCourseId] =useState(searchParams.get("courseId"));
+  const[courseId, setCourseId] =useState("");
+ 
+  
 
   const [ExamData, setExam] = useState<Exam>({} as Exam);
 
@@ -85,11 +87,15 @@ const QuizApp = () => {
     const fetchExamData = async () => {
       const response = await fetch(`/api/v1/exams/${examId}`);
       const data = await response.json();
+      console.log("exam data:",data.data)
+      setAccessType(data.data.accessType)
+      setCourseId(data.data.courseId);
+      setExam(data)
 
       
 
 
-setAccessType(data?.accessType);
+setAccessType(data?.data?.accessType);
 
       setLoading(false);
       if (!response.ok) {
@@ -100,10 +106,11 @@ setAccessType(data?.accessType);
         return;
       }
       setExam(data.data);
+       setCourseId(data.data.courseId);
     };
 
     if (examId) fetchExamData();
-  }, [examId]);
+  }, [examId,accessType,courseId]);
 
   // Pre-populate UserResponse with all questions and default answers
   useEffect(() => {
@@ -348,87 +355,79 @@ setAccessType(data?.accessType);
     }
   };
 
-  const onSubmit = async (ans: boolean) => {
-    if (ans) {
-      const updatedResponse = {
-        ...UserResponse,
-        userId: session?.user.id ?? "",
+ const onSubmit = async (ans: boolean) => {
+  if (ans) {
+    const updatedResponse = {
+      ...UserResponse,
+      userId: session?.user.id ?? "",
+    };
+
+    console.log("User Response: ", updatedResponse);
+
+    try {
+      const response = await fetch(`/api/v1/user-submissions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedResponse),
+      });
+
+      const result = await response.json();
+      console.log(result);
+
+      // Destructuring data from result object
+      const {
+        userId,
+        examId,
+        id: userSubmissionId,
+      } = result.data;
+
+      const report = (await submitAttempt(
+        userId,
+        examId,
+        userSubmissionId,
+        ExamData.totalDurationInSeconds - timeLeft
+      )) as {
+        data: {
+          examId: string; // Note: lowercase 'd'
+          userId: string;
+          userSubmissionId: string;
+          score: number;
+          accuracy: number;
+          attemptedQuestions: number;
+          correctAnswers: number;
+          incorrectAnswers: number;
+          timeTaken: number;
+          percentile: number;
+          rank: number;
+        };
       };
 
-      console.log("User Response: ", updatedResponse);
-
-      try {
-        const response = await fetch(`/api/v1/user-submissions`, {
+      console.log("Report:", report);
+      
+      // Fix: Use examId (lowercase 'd') instead of examID
+      const generateReport = await fetch(
+        `/api/v1/reports/exams/${report.data.examId}/generate-report`,
+        {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedResponse),
-        });
-
-
-        const result = await response.json();
-        console.log(result);
-
-        //destructuring data from result object
-        const {
-          userId,
-          examId,
-          id: userSubmissionId,
-        } = result.data;
-
-
-
-        const report = (await submitAttempt(
-          // result.data.userId,
-          userId,
-          examId,
-          userSubmissionId,
-          ExamData.totalDurationInSeconds - timeLeft
-        )) as {
-          data: {
-            examId: string;
-            userId: string;
-            userSubmissionId: string;
-            score: number;
-            accuracy: number;
-            attemptedQuestions: number;
-            correctAnswers: number;
-            incorrectAnswers: number;
-            timeTaken: number;
-            percentile: number;
-            rank: number;
-          };
-        };
-        /* *
-         *================================================================================================*
-         *   Khalid You see this? This is the report object that you will be using to generate the report.*
-         *   You can use the data in this object to display the report to the user.                       *
-         *   Keep it in usestate and use it in the submitted page.                                        *
-         *================================================================================================*
-         * */
-        console.log("Report:", report);
-        const generateReport = await fetch(
-          `/api/v1/reports/exams/${report.data.examId}/generate-report`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              userId: report.data.userId,
-              userSubmissionId: report.data.userSubmissionId,
-            }),
-          }
-        );
-        const generateReportData = await generateReport.json();
-        // console.log("Generate Report:", generateReportData);
-        setCurrentStep("submitted");
-        setUserResponse(updatedResponse);
-      } catch (error) {
-        console.error("Error submitting attempt:", error);
-      }
-    } else {
-      setCurrentStep("quiz");
+          body: JSON.stringify({
+            userId: report.data.userId,
+            userSubmissionId: report.data.userSubmissionId,
+          }),
+        }
+      );
+      
+      const generateReportData = await generateReport.json();
+      console.log("Generate Report:", generateReportData);
+      setCurrentStep("submitted");
+      setUserResponse(updatedResponse);
+    } catch (error) {
+      console.error("Error submitting attempt:", error);
     }
-  };
-
+  } else {
+    setCurrentStep("quiz");
+  }
+};
   const getQuestionStatus = (
     sectionNumber: number,
     questionNumber: number,
@@ -457,6 +456,7 @@ setAccessType(data?.accessType);
   return (
     <StudyTracker>
        {/* <ExamGuard courseId={courseId} accessType={accessType} /> */}
+
     <div className="min-h-screen">
       {session && currentStep !== "submitted" && (
         <QuizHeader
